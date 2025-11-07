@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kenwa_app/features/config/presentation/pages/configuracion_inicial_page.dart';
+import 'package:kenwa_app/features/config/presentation/pages/settings_page.dart';
 import 'package:kenwa_app/features/home/presentation/pages/home_page.dart';
 import 'package:kenwa_app/features/onboarding/presentation/pages/onboarding_page.dart';
 
@@ -23,6 +24,11 @@ final appRouter = GoRouter(
       name: 'home',
       builder: (context, state) => const HomePage(),
     ),
+    GoRoute(
+      path: '/settings',
+      name: 'settings',
+      builder: (context, state) => const SettingsPage(),
+    ),
   ],
 );
 
@@ -31,6 +37,7 @@ class AppRouter {
   static const String onboarding = '/onboarding';
   static const String configuracion = '/configuracion';
   static const String home = '/home';
+  static const String settings = '/settings';
 
   /// Navega al onboarding
   static void goOnboarding(BuildContext context) {
@@ -45,5 +52,10 @@ class AppRouter {
   /// Navega a la pantalla principal
   static void goHome(BuildContext context) {
     context.goNamed('home');
+  }
+
+  /// Navega a la pantalla de configuración
+  static void goSettings(BuildContext context) {
+    context.goNamed('settings');
   }
 }

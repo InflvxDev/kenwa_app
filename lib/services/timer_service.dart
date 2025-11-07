@@ -16,6 +16,8 @@ class TimerService {
   Timer? _timer;
   int _remainingSeconds = 0;
   TimerState _state = TimerState.idle;
+  TimerState _lastActiveState =
+      TimerState.idle; // Almacena el último estado activo
 
   // Configuración actual
   int _workDurationMinutes = 60;
@@ -30,6 +32,7 @@ class TimerService {
 
   int get remainingSeconds => _remainingSeconds;
   TimerState get state => _state;
+  TimerState get lastActiveState => _lastActiveState;
 
   /// Configurar duración de trabajo y descanso
   void configure({
@@ -48,6 +51,7 @@ class TimerService {
 
     _remainingSeconds = _workDurationMinutes * 60;
     _state = TimerState.working;
+    _lastActiveState = TimerState.working;
     _stateStream.add(_state);
     _startTimer();
   }
@@ -60,6 +64,7 @@ class TimerService {
 
     _remainingSeconds = _breakDurationMinutes * 60;
     _state = TimerState.breakActive;
+    _lastActiveState = TimerState.breakActive;
     _stateStream.add(_state);
     _startTimer();
   }

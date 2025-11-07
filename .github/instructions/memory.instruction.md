@@ -73,9 +73,35 @@ applyTo: '**'
   - Notification trigger when timer completes
   - Stream-based updates for reactive UI
 - **HomePage**: `lib/features/home/presentation/pages/home_page.dart`
-  - Header with "Kenwa" logo on top-left
-  - Central circular countdown display (280x280 px)
-  - Status label showing current state
-  - Context-sensitive control buttons (Start/Pause/Stop/Resume/Break)
+  - Simplified page with main logic
+  - Uses separate widgets for better maintainability
+- **Widget Components** (in `lib/features/home/presentation/widgets/`):
+  - `home_header.dart`: Header with "Kenwa" logo and settings icon
+  - `timer_display.dart`: Circular countdown display (220x220 px with 44px font)
+  - `timer_status_label.dart`: Status label (Trabajando, Pausado, Completado, etc.)
+  - `timer_controls.dart`: Context-sensitive control buttons (Start/Pause/Stop/Resume/Break)
+- **Integration**:
   - Loads user configuration (intervals and durations) on init
   - Shows notifications via NotificationService when work/break completes
+  - Settings icon navigates to SettingsPage via AppRouter.goSettings()
+
+## Settings Feature (Complete)
+- **Purpose**: Allow user to edit and save configuration from home screen
+- **Page**: `lib/features/config/presentation/pages/settings_page.dart` ✅
+  - Loads current configuration from SharedPreferences on init
+  - Displays form with same 5 fields as configuracion_inicial_page:
+    - Jornada laboral (start/end time)
+    - Intervalos de descanso (frequency slider)
+    - Duración del descanso (duration slider)
+    - Nivel de estrés (emoji selector)
+    - Notificaciones toggle
+  - Save button persists changes and navigates to home
+  - Cancel button (back icon) navigates to home
+  - Fallback to defaults if no prior config exists
+- **Navigation**: 
+  - Route: `/settings` in GoRouter ✅
+  - Helper: `AppRouter.goSettings(context)` ✅
+  - Trigger: Settings icon button on HomePage navigates to SettingsPage ✅
+  - Uses `context.go('/home')` to navigate (not pop) ✅
+  - AppBar background: Primary color ✅
+- **Status**: COMPLETE - Ready for testing

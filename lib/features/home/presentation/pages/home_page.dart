@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:kenwa_app/app/router.dart';
 import 'package:kenwa_app/app/theme/app_colors.dart';
 import 'package:kenwa_app/features/config/data/sources/configuracion_local_source.dart';
 import 'package:kenwa_app/features/config/domain/repositories/configuracion_repository.dart';
 import 'package:kenwa_app/features/config/domain/usecases/obtener_configuracion.dart';
+import 'package:kenwa_app/features/home/presentation/widgets/home_header.dart';
+import 'package:kenwa_app/features/home/presentation/widgets/timer_controls.dart';
+import 'package:kenwa_app/features/home/presentation/widgets/timer_display.dart';
+import 'package:kenwa_app/features/home/presentation/widgets/timer_status_label.dart';
 import 'package:kenwa_app/services/notification_service.dart';
 import 'package:kenwa_app/services/timer_service.dart';
 
@@ -72,7 +77,7 @@ class _HomePageState extends State<HomePage> {
 
   void _handleTimerCompleted() {
     final message = _timerState == TimerState.completed
-        ? (_timerService.state == TimerState.working
+        ? (_timerService.lastActiveState == TimerState.working
               ? '¡Hora de descansar!'
               : '¡Volvamos al trabajo!')
         : '';
@@ -117,21 +122,6 @@ class _HomePageState extends State<HomePage> {
     _timerService.stop();
   }
 
-  String _getTimerLabel() {
-    switch (_timerState) {
-      case TimerState.idle:
-        return 'Listo para comenzar';
-      case TimerState.working:
-        return 'Trabajando';
-      case TimerState.paused:
-        return 'Pausado';
-      case TimerState.breakActive:
-        return 'Tiempo de descanso';
-      case TimerState.completed:
-        return 'Completado';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -147,227 +137,32 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             // Header con el nombre de la app a la izquierda
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Kenwa',
-                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  // Iconos adicionales (puede ser settings, perfil, etc.)
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.settings_outlined),
-                  ),
-                ],
-              ),
-            ),
+            HomeHeader(onSettingsPressed: () => AppRouter.goSettings(context)),
             // Contenido central con countdown
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Etiqueta del estado actual
-                  Text(
-                    _getTimerLabel(),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: AppColors.foreground.withValues(alpha: 0.7),
-                      fontSize: 18,
-                    ),
-                  ),
+                  TimerStatusLabel(timerState: _timerState),
                   const SizedBox(height: 40),
 
                   // Circular countdown display
-                  Container(
-                    width: 220,
-                    height: 220,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.3),
-                        width: 4,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          blurRadius: 20,
-                          spreadRadius: 5,
-                        ),
-                      ],
-                    ),
-                    child: Center(
-                      child: Text(
-                        _timerService.formatTime(_remainingSeconds),
-                        style: Theme.of(context).textTheme.displayLarge
-                            ?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
-                              fontSize: 44,
-                            ),
-                      ),
-                    ),
+                  TimerDisplay(
+                    timerService: _timerService,
+                    remainingSeconds: _remainingSeconds,
                   ),
 
                   const SizedBox(height: 60),
 
                   // Botones de control
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Botón de inicio
-                      if (_timerState == TimerState.idle)
-                        ElevatedButton.icon(
-                          onPressed: _startTimer,
-                          icon: const Icon(Icons.play_arrow),
-                          label: const Text('Comenzar Trabajo'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 16,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-
-                      // Botón de pausa/resume
-                      if (_timerState == TimerState.working ||
-                          _timerState == TimerState.breakActive)
-                        Row(
-                          children: [
-                            ElevatedButton.icon(
-                              onPressed: _pauseTimer,
-                              icon: const Icon(Icons.pause),
-                              label: const Text('Pausar'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 16,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            OutlinedButton.icon(
-                              onPressed: _stopTimer,
-                              icon: const Icon(Icons.stop),
-                              label: const Text('Detener'),
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(
-                                  color: AppColors.foreground.withValues(
-                                    alpha: 0.3,
-                                  ),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 16,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                      // Botón de reanudar
-                      if (_timerState == TimerState.paused)
-                        Row(
-                          children: [
-                            ElevatedButton.icon(
-                              onPressed: _resumeTimer,
-                              icon: const Icon(Icons.play_arrow),
-                              label: const Text('Reanudar'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 16,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            OutlinedButton.icon(
-                              onPressed: _stopTimer,
-                              icon: const Icon(Icons.stop),
-                              label: const Text('Detener'),
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(
-                                  color: AppColors.foreground.withValues(
-                                    alpha: 0.3,
-                                  ),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 16,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                      // Botón de completado
-                      if (_timerState == TimerState.completed)
-                        Row(
-                          children: [
-                            ElevatedButton.icon(
-                              onPressed: _startBreak,
-                              icon: const Icon(Icons.emoji_food_beverage),
-                              label: const Text('Descansar'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 16,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            OutlinedButton.icon(
-                              onPressed: _startTimer,
-                              icon: const Icon(Icons.restart_alt),
-                              label: const Text('Reiniciar'),
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(
-                                  color: AppColors.foreground.withValues(
-                                    alpha: 0.3,
-                                  ),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 16,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                    ],
+                  TimerControls(
+                    timerState: _timerState,
+                    onStart: _startTimer,
+                    onPause: _pauseTimer,
+                    onResume: _resumeTimer,
+                    onStop: _stopTimer,
+                    onBreakStart: _startBreak,
                   ),
                 ],
               ),
