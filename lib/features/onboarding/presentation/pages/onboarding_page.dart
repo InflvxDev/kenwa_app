@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kenwa_app/app/router.dart';
 import 'package:kenwa_app/app/theme/app_colors.dart';
 import 'package:kenwa_app/features/onboarding/presentation/models/onboarding_model.dart';
 import 'package:kenwa_app/features/onboarding/presentation/widgets/onboarding_button.dart';
@@ -66,10 +67,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   void _completeOnboarding() {
-    // TODO: Implementar navegación a la pantalla principal después del onboarding
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('¡Onboarding completado!')));
+    // Navega a la configuración inicial
+    AppRouter.goConfiguracion(context);
   }
 
   @override
