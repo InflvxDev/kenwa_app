@@ -7,11 +7,14 @@ class KenwaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Crear el router con la ubicación inicial dinámica
+    final router = createAppRouter();
+
     return MaterialApp.router(
       title: 'Kenwa Salud y Armonía',
       theme: AppTheme.lightTheme,
       debugShowCheckedModeBanner: false,
-      routerConfig: appRouter,
+      routerConfig: router,
     );
   }
 }

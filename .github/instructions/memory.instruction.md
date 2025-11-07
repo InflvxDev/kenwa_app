@@ -85,7 +85,22 @@ applyTo: '**'
   - Shows notifications via NotificationService when work/break completes
   - Settings icon navigates to SettingsPage via AppRouter.goSettings()
 
-## Settings Feature (Complete)
+## Routing System (Complete)
+- **Framework**: GoRouter 14.x for navigation
+- **Routes**:
+  - `/onboarding` → OnboardingPage (3-screen carousel)
+  - `/configuracion` → ConfiguracionInicialPage (initial setup)
+  - `/home` → HomePage (main timer screen)
+  - `/settings` → SettingsPage (edit configuration)
+- **Dynamic Initial Location** ✅:
+  - Function: `_determineInitialLocation()` checks if config exists
+  - If configuration exists → Start at `/home`
+  - If no configuration → Start at `/onboarding`
+  - Initialization: `initializeRouter()` called in main() before runApp()
+  - Implementation: `createAppRouter()` creates router with dynamic initial location
+- **Helper Class**: `AppRouter` with static methods for navigation
+  - `goOnboarding()`, `goConfiguracion()`, `goHome()`, `goSettings()`
+- **Status**: COMPLETE ✅
 - **Purpose**: Allow user to edit and save configuration from home screen
 - **Page**: `lib/features/config/presentation/pages/settings_page.dart` ✅
   - Loads current configuration from SharedPreferences on init
