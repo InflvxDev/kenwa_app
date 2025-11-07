@@ -63,7 +63,19 @@ applyTo: '**'
   - build.gradle.kts: Added desugar_jdk_libs:2.1.4 dependency
   - Created app_icon.xml drawable resource for notification icon
 
-## Known Implementation Patterns
-- Modal dialogs use neutral background with foreground accents
-- Time inputs use 2-digit padding (padLeft(2, '0'))
-- All time values stored/displayed in 24-hour format
+## Home Feature Implementation
+- **Service**: `lib/services/timer_service.dart` - Singleton TimerService with countdown logic
+- **Timer States**: idle, working, paused, breakActive, completed
+- **Features**:
+  - Configurable work and break durations loaded from user preferences
+  - Real-time countdown display (HH:MM:SS format)
+  - Play/Pause/Stop/Resume controls
+  - Notification trigger when timer completes
+  - Stream-based updates for reactive UI
+- **HomePage**: `lib/features/home/presentation/pages/home_page.dart`
+  - Header with "Kenwa" logo on top-left
+  - Central circular countdown display (280x280 px)
+  - Status label showing current state
+  - Context-sensitive control buttons (Start/Pause/Stop/Resume/Break)
+  - Loads user configuration (intervals and durations) on init
+  - Shows notifications via NotificationService when work/break completes

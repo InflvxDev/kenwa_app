@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kenwa_app/features/config/presentation/pages/configuracion_inicial_page.dart';
+import 'package:kenwa_app/features/home/presentation/pages/home_page.dart';
 import 'package:kenwa_app/features/onboarding/presentation/pages/onboarding_page.dart';
 
 /// Sistema de rutas con GoRouter
@@ -20,8 +21,7 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/home',
       name: 'home',
-      builder: (context, state) =>
-          const Scaffold(body: Center(child: Text('Pantalla Principal'))),
+      builder: (context, state) => const HomePage(),
     ),
   ],
 );
