@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kenwa_app/features/onboarding/presentation/pages/onboarding_page.dart';
+import 'package:kenwa_app/app/router.dart';
 import 'theme/app_theme.dart';
 
 class KenwaApp extends StatelessWidget {
@@ -7,11 +7,11 @@ class KenwaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Kenwa Salud y Armonía',
       theme: AppTheme.lightTheme,
       debugShowCheckedModeBanner: false,
-      home: const OnboardingPage(),
+      routerConfig: appRouter,
     );
   }
 }
