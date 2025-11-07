@@ -8,7 +8,7 @@
     <application
         android:label="kenwa"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher_monochrome">
         <activity
             android:name=".MainActivity"
             android:exported="true"
