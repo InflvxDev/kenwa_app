@@ -43,6 +43,21 @@ class _NivelEstresSelectorState extends State<NivelEstresSelector> {
     }
   }
 
+  String _getNivelEmoji(int level) {
+    switch (level) {
+      case 1:
+        return '☺️';
+      case 2:
+        return '😐';
+      case 3:
+        return '😨';
+      case 4:
+        return '😡';
+      default:
+        return '☺️';
+    }
+  }
+
   Color _getNivelColor(int level) {
     switch (level) {
       case 1:
@@ -92,36 +107,31 @@ class _NivelEstresSelectorState extends State<NivelEstresSelector> {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? _getNivelColor(level).withValues(alpha: 0.2)
-                          : Colors.grey.withValues(alpha: 0.1),
+                          ? _getNivelColor(level).withValues(alpha: 0.15)
+                          : Colors.transparent,
                       border: Border.all(
                         color: isSelected
                             ? _getNivelColor(level)
-                            : Colors.grey.withValues(alpha: 0.3),
-                        width: isSelected ? 2 : 1,
+                            : Colors.grey.withValues(alpha: 0.25),
+                        width: isSelected ? 2 : 1.5,
                       ),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Column(
                       children: [
                         Text(
-                          level.toString(),
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: isSelected
-                                ? _getNivelColor(level)
-                                : Colors.grey,
-                          ),
+                          _getNivelEmoji(level),
+                          style: const TextStyle(fontSize: 36),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 8),
                         Text(
                           _getNivelLabel(level),
                           style: TextStyle(
                             fontSize: 12,
+                            fontWeight: FontWeight.w600,
                             color: isSelected
                                 ? _getNivelColor(level)
-                                : Colors.grey,
+                                : Colors.grey.withValues(alpha: 0.6),
                           ),
                           textAlign: TextAlign.center,
                         ),

@@ -92,138 +92,145 @@ class _ConfiguracionInicialPageState extends State<ConfiguracionInicialPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: const Text('Configuración Inicial'), elevation: 0),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Personaliza tu experiencia en Kenwa',
-              style: Theme.of(context).textTheme.displayMedium,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Estos datos nos ayudarán a ofrecerte recomendaciones personalizadas',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 32),
-
-            // Sección de Jornada Laboral
-            Text(
-              'Jornada Laboral',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontSize: 18),
-            ),
-            const SizedBox(height: 16),
-            HorarioInput(
-              label: 'Hora de inicio',
-              initialTime: _horaInicio,
-              onTimeChanged: (time) {
-                setState(() => _horaInicio = time);
-              },
-            ),
-            const SizedBox(height: 16),
-            HorarioInput(
-              label: 'Hora de fin',
-              initialTime: _horaFin,
-              onTimeChanged: (time) {
-                setState(() => _horaFin = time);
-              },
-            ),
-            const SizedBox(height: 32),
-
-            // Sección de Intervalos
-            Text(
-              'Intervalos de Descanso',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontSize: 18),
-            ),
-            const SizedBox(height: 16),
-            FrecuenciaSlider(
-              label: 'Intervalo entre descansos',
-              subLabel: 'Tiempo entre cada pausa activa',
-              initialValue: _intervaloDescansos,
-              minValue: 15,
-              maxValue: 120,
-              unit: 'min',
-              onValueChanged: (value) {
-                setState(() => _intervaloDescansos = value);
-              },
-            ),
-            const SizedBox(height: 24),
-            FrecuenciaSlider(
-              label: 'Duración del descanso',
-              subLabel: 'Tiempo de pausa recomendado',
-              initialValue: _tiempoDescanso,
-              minValue: 1,
-              maxValue: 15,
-              unit: 'min',
-              onValueChanged: (value) {
-                setState(() => _tiempoDescanso = value);
-              },
-            ),
-            const SizedBox(height: 32),
-
-            // Sección de Nivel de Estrés
-            NivelEstresSelector(
-              label: 'Nivel de estrés inicial',
-              subLabel: 'Selecciona tu nivel actual de estrés',
-              initialLevel: _nivelEstres,
-              onLevelChanged: (level) {
-                setState(() => _nivelEstres = level);
-              },
-            ),
-            const SizedBox(height: 32),
-
-            // Sección de Notificaciones
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 16),
+              Text(
+                'Personaliza tu experiencia en Kenwa',
+                style: Theme.of(context).textTheme.displayMedium,
+                textAlign: TextAlign.center,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Notificaciones',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Recibe recordatorios de descanso',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                  Switch(
-                    value: _notificacionesActivas,
-                    onChanged: (value) {
-                      setState(() => _notificacionesActivas = value);
-                    },
-                    activeThumbColor: AppColors.primary,
-                  ),
-                ],
+              const SizedBox(height: 8),
+              Text(
+                'Estos datos nos ayudarán a ofrecerte recomendaciones personalizadas',
+                style: Theme.of(context).textTheme.bodySmall,
               ),
-            ),
-            const SizedBox(height: 40),
+              const SizedBox(height: 32),
 
-            // Botón Guardar
-            BotonGuardar(
-              label: 'Guardar Configuración',
-              isLoading: _controller.isLoading,
-              onPressed: _guardarConfiguracion,
-            ),
-            const SizedBox(height: 24),
-          ],
+              // Sección de Jornada Laboral
+              Text(
+                'Jornada Laboral',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontSize: 18),
+              ),
+              const SizedBox(height: 16),
+              HorarioInput(
+                label: 'Hora de inicio',
+                initialTime: _horaInicio,
+                onTimeChanged: (time) {
+                  setState(() => _horaInicio = time);
+                },
+              ),
+              const SizedBox(height: 16),
+              HorarioInput(
+                label: 'Hora de fin',
+                initialTime: _horaFin,
+                onTimeChanged: (time) {
+                  setState(() => _horaFin = time);
+                },
+              ),
+              const SizedBox(height: 32),
+
+              // Sección de Intervalos
+              Text(
+                'Intervalos de Descanso',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontSize: 18),
+              ),
+              const SizedBox(height: 16),
+              FrecuenciaSlider(
+                label: 'Intervalo entre descansos',
+                subLabel: 'Tiempo entre cada pausa activa',
+                initialValue: _intervaloDescansos,
+                minValue: 15,
+                maxValue: 120,
+                unit: 'min',
+                onValueChanged: (value) {
+                  setState(() => _intervaloDescansos = value);
+                },
+              ),
+              const SizedBox(height: 24),
+              FrecuenciaSlider(
+                label: 'Duración del descanso',
+                subLabel: 'Tiempo de pausa recomendado',
+                initialValue: _tiempoDescanso,
+                minValue: 1,
+                maxValue: 15,
+                unit: 'min',
+                onValueChanged: (value) {
+                  setState(() => _tiempoDescanso = value);
+                },
+              ),
+              const SizedBox(height: 32),
+
+              // Sección de Nivel de Estrés
+              NivelEstresSelector(
+                label: 'Nivel de estrés inicial',
+                subLabel: 'Selecciona tu nivel actual de estrés',
+                initialLevel: _nivelEstres,
+                onLevelChanged: (level) {
+                  setState(() => _nivelEstres = level);
+                },
+              ),
+              const SizedBox(height: 32),
+
+              // Sección de Notificaciones
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.foreground.withValues(alpha: 0.06),
+                  border: Border.all(
+                    color: AppColors.foreground.withValues(alpha: 0.15),
+                    width: 1.5,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Notificaciones',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Recibe recordatorios de descanso',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                    Switch(
+                      value: _notificacionesActivas,
+                      onChanged: (value) {
+                        setState(() => _notificacionesActivas = value);
+                      },
+                      activeThumbColor: AppColors.primary,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 40),
+
+              // Botón Guardar
+              BotonGuardar(
+                label: 'Guardar Configuración',
+                isLoading: _controller.isLoading,
+                onPressed: _guardarConfiguracion,
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );

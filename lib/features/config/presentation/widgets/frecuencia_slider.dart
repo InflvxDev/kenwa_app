@@ -62,7 +62,7 @@ class _FrecuenciaSliderState extends State<FrecuenciaSlider> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: AppColors.foreground.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -81,7 +81,7 @@ class _FrecuenciaSliderState extends State<FrecuenciaSlider> {
           max: widget.maxValue.toDouble(),
           divisions: widget.maxValue - widget.minValue,
           activeColor: AppColors.primary,
-          inactiveColor: AppColors.primary.withValues(alpha: 0.2),
+          inactiveColor: AppColors.foreground.withValues(alpha: 0.15),
           label: '$_currentValue ${widget.unit}',
           onChanged: (value) {
             setState(() {

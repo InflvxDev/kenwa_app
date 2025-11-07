@@ -130,8 +130,12 @@ class _HorarioInputState extends State<HorarioInput> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              border: Border.all(color: AppColors.primary, width: 2),
+              border: Border.all(
+                color: AppColors.foreground.withValues(alpha: 0.3),
+                width: 1.5,
+              ),
               borderRadius: BorderRadius.circular(8),
+              color: AppColors.primary.withValues(alpha: 0.05),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -140,7 +144,10 @@ class _HorarioInputState extends State<HorarioInput> {
                   _selectedTime.toString(),
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
-                const Icon(Icons.access_time, color: AppColors.primary),
+                Icon(
+                  Icons.access_time,
+                  color: AppColors.foreground.withValues(alpha: 0.7),
+                ),
               ],
             ),
           ),
