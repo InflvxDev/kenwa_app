@@ -11,6 +11,7 @@ import 'package:kenwa_app/features/config/presentation/widgets/boton_guardar.dar
 import 'package:kenwa_app/features/config/presentation/widgets/frecuencia_slider.dart';
 import 'package:kenwa_app/features/config/presentation/widgets/horario_input.dart';
 import 'package:kenwa_app/features/config/presentation/widgets/nivel_estres_selector.dart';
+import 'package:kenwa_app/services/notification_service.dart';
 
 /// Página de configuración inicial del usuario
 class ConfiguracionInicialPage extends StatefulWidget {
@@ -50,11 +51,11 @@ class _ConfiguracionInicialPageState extends State<ConfiguracionInicialPage> {
   }
 
   void _initializeDefaults() {
-    _horaInicio = HoraDelDia(hour: 9, minute: 0);
+    _horaInicio = HoraDelDia(hour: 8, minute: 0);
     _horaFin = HoraDelDia(hour: 18, minute: 0);
     _intervaloDescansos = 60; // minutos
     _tiempoDescanso = 5; // minutos
-    _notificacionesActivas = true;
+    _notificacionesActivas = false;
     _nivelEstres = 2;
   }
 
@@ -212,8 +213,41 @@ class _ConfiguracionInicialPageState extends State<ConfiguracionInicialPage> {
                     ),
                     Switch(
                       value: _notificacionesActivas,
-                      onChanged: (value) {
-                        setState(() => _notificacionesActivas = value);
+                      onChanged: (value) async {
+                        // Si activa las notificaciones, solicitar permisos
+                        if (value) {
+                          // Capturar el messenger ANTES de cualquier operación asíncrona
+                          final messenger = ScaffoldMessenger.of(context);
+
+                          final notificationService = NotificationService();
+                          await notificationService.initialize();
+                          final permissionGranted = await notificationService
+                              .requestNotificationPermission();
+
+                          if (!mounted) return;
+
+                          if (permissionGranted) {
+                            setState(() => _notificacionesActivas = true);
+                            messenger.showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Permisos de notificaciones habilitados',
+                                ),
+                              ),
+                            );
+                          } else {
+                            setState(() => _notificacionesActivas = false);
+                            messenger.showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Se necesitan permisos de notificaciones',
+                                ),
+                              ),
+                            );
+                          }
+                        } else {
+                          setState(() => _notificacionesActivas = false);
+                        }
                       },
                       activeThumbColor: AppColors.primary,
                     ),

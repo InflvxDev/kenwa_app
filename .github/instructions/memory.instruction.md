@@ -43,6 +43,25 @@ applyTo: '**'
 - flutter/services.dart - for FilteringTextInputFormatter
 - go_router - navigation
 - shared_preferences - local storage
+- flutter_local_notifications: ^19.5.0 - notification management and permissions
+
+## Notification System Implementation
+- **Service**: `lib/services/notification_service.dart` - Singleton NotificationService class
+- **Features**:
+  - Initialize notifications on app startup
+  - Request notification permissions (Android 13+, iOS, macOS)
+  - Check notification status
+  - Show simple notifications
+  - Schedule periodic notifications
+  - Cancel notifications
+- **Integration**: ConfiguracionInicialPage Switch now calls requestNotificationPermission() when enabled
+- **Platforms**: Android, iOS, macOS, Linux, Windows supported via flutter_local_notifications
+- **Android Setup Complete**:
+  - AndroidManifest.xml: Added POST_NOTIFICATIONS, VIBRATE, RECEIVE_BOOT_COMPLETED, SCHEDULE_EXACT_ALARM permissions
+  - AndroidManifest.xml: Added receivers for ScheduledNotificationReceiver, ScheduledNotificationBootReceiver, ActionBroadcastReceiver
+  - build.gradle.kts: Enabled core library desugaring, set compileSdk to 35
+  - build.gradle.kts: Added desugar_jdk_libs:2.1.4 dependency
+  - Created app_icon.xml drawable resource for notification icon
 
 ## Known Implementation Patterns
 - Modal dialogs use neutral background with foreground accents
