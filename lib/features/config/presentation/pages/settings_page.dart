@@ -12,6 +12,7 @@ import 'package:kenwa_app/features/config/presentation/widgets/frecuencia_slider
 import 'package:kenwa_app/features/config/presentation/widgets/horario_input.dart';
 import 'package:kenwa_app/features/config/presentation/widgets/nivel_estres_selector.dart';
 import 'package:kenwa_app/services/notification_service.dart';
+import 'package:kenwa_app/services/timer_service.dart';
 
 /// Página de configuración editable desde el home
 class SettingsPage extends StatefulWidget {
@@ -100,6 +101,9 @@ class _SettingsPageState extends State<SettingsPage> {
     if (!mounted) return;
 
     if (success) {
+      // Resetear el timer cuando se guarda nueva configuración
+      TimerService().reset();
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Configuración guardada exitosamente')),
       );
@@ -201,7 +205,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 label: 'Intervalo entre descansos',
                 subLabel: 'Tiempo entre cada pausa activa',
                 initialValue: _intervaloDescansos,
-                minValue: 15,
+                minValue: 1,
                 maxValue: 120,
                 unit: 'min',
                 onValueChanged: (value) {

@@ -149,7 +149,7 @@ class _ConfiguracionInicialPageState extends State<ConfiguracionInicialPage> {
                 label: 'Intervalo entre descansos',
                 subLabel: 'Tiempo entre cada pausa activa',
                 initialValue: _intervaloDescansos,
-                minValue: 15,
+                minValue: 1,
                 maxValue: 120,
                 unit: 'min',
                 onValueChanged: (value) {

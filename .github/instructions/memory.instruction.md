@@ -69,21 +69,26 @@ applyTo: '**'
 - **Features**:
   - Configurable work and break durations loaded from user preferences
   - Real-time countdown display (HH:MM:SS format)
-  - Play/Pause/Stop/Resume controls
+  - Play/Pause/Stop/Resume/Reset controls
   - Notification trigger when timer completes
   - Stream-based updates for reactive UI
+  - `lastActiveState` property tracks which type of session (work/break) was active
+  - `reset()` method to return to idle state and reset timer
 - **HomePage**: `lib/features/home/presentation/pages/home_page.dart`
   - Simplified page with main logic
   - Uses separate widgets for better maintainability
+  - `_resetTimer()` method calls `_timerService.reset()`
 - **Widget Components** (in `lib/features/home/presentation/widgets/`):
   - `home_header.dart`: Header with "Kenwa" logo and settings icon
   - `timer_display.dart`: Circular countdown display (220x220 px with 44px font)
   - `timer_status_label.dart`: Status label (Trabajando, Pausado, Completado, etc.)
-  - `timer_controls.dart`: Context-sensitive control buttons (Start/Pause/Stop/Resume/Break)
+  - `timer_controls.dart`: Context-sensitive control buttons (Start/Pause/Stop/Resume/Reset/Break)
+    - `onReset` callback for reinicio button functionality
 - **Integration**:
   - Loads user configuration (intervals and durations) on init
   - Shows notifications via NotificationService when work/break completes
   - Settings icon navigates to SettingsPage via AppRouter.goSettings()
+  - Reinicio button properly resets timer to idle state
 
 ## Routing System (Complete)
 - **Framework**: GoRouter 14.x for navigation
