@@ -85,6 +85,18 @@ class TimerService {
     }
   }
 
+  /// Reiniciar timer (vuelve al estado idle)
+  void reset() {
+    if (_timer != null && _timer!.isActive) {
+      _timer!.cancel();
+    }
+    _remainingSeconds = 0;
+    _state = TimerState.idle;
+    _lastActiveState = TimerState.idle;
+    _stateStream.add(_state);
+    _timerStream.add(0);
+  }
+
   /// Detener timer completamente
   void stop() {
     if (_timer != null && _timer!.isActive) {
@@ -116,7 +128,16 @@ class TimerService {
       } else {
         // Timer completado
         _timer?.cancel();
-        _state = TimerState.completed;
+
+        // Si fue un descanso, volver automáticamente a idle
+        // Si fue trabajo, mostrar completed para que el usuario elija descansar
+        if (_lastActiveState == TimerState.breakActive) {
+          _state = TimerState.idle;
+          _lastActiveState = TimerState.idle;
+        } else {
+          _state = TimerState.completed;
+        }
+
         _stateStream.add(_state);
         _timerStream.add(0);
       }
@@ -135,7 +156,7 @@ class TimerService {
   /// Limpiar recursos
   void dispose() {
     _timer?.cancel();
-    _timerStream.close();
-    _stateStream.close();
+    // NO cerramos los streams porque TimerService es un singleton
+    // que se reutiliza en toda la app. Los streams deben permanecer abiertos.
   }
 }

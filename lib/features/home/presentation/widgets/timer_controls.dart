@@ -5,20 +5,24 @@ import 'package:kenwa_app/services/timer_service.dart';
 /// Widget que muestra los botones de control del timer
 class TimerControls extends StatelessWidget {
   final TimerState timerState;
+  final TimerState lastActiveState;
   final VoidCallback onStart;
   final VoidCallback onPause;
   final VoidCallback onResume;
   final VoidCallback onStop;
   final VoidCallback onBreakStart;
+  final VoidCallback onReset;
 
   const TimerControls({
     super.key,
     required this.timerState,
+    required this.lastActiveState,
     required this.onStart,
     required this.onPause,
     required this.onResume,
     required this.onStop,
     required this.onBreakStart,
+    required this.onReset,
   });
 
   @override
@@ -129,25 +133,45 @@ class TimerControls extends StatelessWidget {
         if (timerState == TimerState.completed)
           Row(
             children: [
-              ElevatedButton.icon(
-                onPressed: onBreakStart,
-                icon: const Icon(Icons.emoji_food_beverage),
-                label: const Text('Descansar'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
+              // Si el último estado activo fue trabajo, mostrar "Descansar"
+              // Si fue descanso, mostrar "Comenzar Trabajo"
+              if (lastActiveState == TimerState.working)
+                ElevatedButton.icon(
+                  onPressed: onBreakStart,
+                  icon: const Icon(Icons.emoji_food_beverage),
+                  label: const Text('Descansar'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                )
+              else if (lastActiveState == TimerState.breakActive)
+                ElevatedButton.icon(
+                  onPressed: onStart,
+                  icon: const Icon(Icons.play_arrow),
+                  label: const Text('Comenzar Trabajo'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
-              ),
               const SizedBox(width: 16),
               OutlinedButton.icon(
-                onPressed: onStart,
+                onPressed: onReset,
                 icon: const Icon(Icons.restart_alt),
                 label: const Text('Reiniciar'),
                 style: OutlinedButton.styleFrom(

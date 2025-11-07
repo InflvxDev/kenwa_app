@@ -10,6 +10,7 @@ import 'package:kenwa_app/features/home/presentation/widgets/timer_display.dart'
 import 'package:kenwa_app/features/home/presentation/widgets/timer_status_label.dart';
 import 'package:kenwa_app/services/notification_service.dart';
 import 'package:kenwa_app/services/timer_service.dart';
+import 'dart:async';
 
 /// Página principal de la app con contador regresivo
 class HomePage extends StatefulWidget {
@@ -24,6 +25,12 @@ class _HomePageState extends State<HomePage> {
   bool _isLoading = true;
   late TimerState _timerState;
   late int _remainingSeconds;
+  bool _breakJustCompleted = false; // Detectar cuando break se completa
+  late TimerState _completedSessionType; // Guardar tipo de sesión completada
+
+  // Guardar subscripciones para cancelarlas en dispose
+  late StreamSubscription<int> _timerStreamSubscription;
+  late StreamSubscription<TimerState> _stateStreamSubscription;
 
   @override
   void initState() {
@@ -61,40 +68,58 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _setupTimerListeners() {
-    _timerService.timerStream.listen((seconds) {
-      setState(() => _remainingSeconds = seconds);
+    _timerStreamSubscription = _timerService.timerStream.listen((seconds) {
+      if (mounted) {
+        setState(() => _remainingSeconds = seconds);
+      }
     });
 
-    _timerService.stateStream.listen((state) {
-      setState(() => _timerState = state);
+    _stateStreamSubscription = _timerService.stateStream.listen((state) {
+      if (mounted) {
+        setState(() {
+          _timerState = state;
 
-      // Mostrar notificación cuando se completa
-      if (state == TimerState.completed) {
-        _handleTimerCompleted();
+          // Detectar cuando un break se completa y pasa a idle
+          if (state == TimerState.idle &&
+              _timerService.lastActiveState == TimerState.idle &&
+              _remainingSeconds == 0 &&
+              !_breakJustCompleted) {
+            // El break acaba de completarse y auto-transicionar a idle
+            _breakJustCompleted = true;
+            // Guardar que fue un break el que se completó
+            _completedSessionType = TimerState.breakActive;
+            _handleTimerCompleted();
+          } else if (state == TimerState.completed) {
+            // El trabajo se completó, mostrar notificación
+            _breakJustCompleted = false;
+            // Guardar que fue trabajo el que se completó
+            _completedSessionType = TimerState.working;
+            _handleTimerCompleted();
+          } else if (state != TimerState.idle) {
+            // Reset cuando se inicia un nuevo timer
+            _breakJustCompleted = false;
+          }
+        });
       }
     });
   }
 
   void _handleTimerCompleted() {
-    final message = _timerState == TimerState.completed
-        ? (_timerService.lastActiveState == TimerState.working
-              ? '¡Hora de descansar!'
-              : '¡Volvamos al trabajo!')
-        : '';
+    // Usar _completedSessionType que se guardó ANTES de que se resetee el lastActiveState
+    final message = _completedSessionType == TimerState.working
+        ? '¡Hora de descansar!'
+        : (_completedSessionType == TimerState.breakActive
+              ? '¡Volvamos al trabajo!'
+              : '');
 
     if (message.isNotEmpty) {
-      // Mostrar notificación del sistema si están habilitadas
+      // Mostrar solo la notificación del sistema
       final notificationService = NotificationService();
       notificationService.showNotification(
         id: 1,
         title: 'Kenwa',
         body: message,
       );
-
-      // Mostrar SnackBar
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
     }
   }
 
@@ -120,6 +145,10 @@ class _HomePageState extends State<HomePage> {
 
   void _stopTimer() {
     _timerService.stop();
+  }
+
+  void _resetTimer() {
+    _timerService.reset();
   }
 
   @override
@@ -158,11 +187,13 @@ class _HomePageState extends State<HomePage> {
                   // Botones de control
                   TimerControls(
                     timerState: _timerState,
+                    lastActiveState: _timerService.lastActiveState,
                     onStart: _startTimer,
                     onPause: _pauseTimer,
                     onResume: _resumeTimer,
                     onStop: _stopTimer,
                     onBreakStart: _startBreak,
+                    onReset: _resetTimer,
                   ),
                 ],
               ),
@@ -175,6 +206,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
+    // Cancelar las subscripciones al stream para evitar setState() after dispose
+    _timerStreamSubscription.cancel();
+    _stateStreamSubscription.cancel();
     _timerService.dispose();
     super.dispose();
   }
