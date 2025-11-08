@@ -183,7 +183,7 @@ class _ConfiguracionInicialPageState extends State<ConfiguracionInicialPage> {
 
               // Sección de Nivel de Estrés
               NivelEstresSelector(
-                label: 'Nivel de estrés inicial',
+                label: 'Nivel de estrés',
                 subLabel: 'Selecciona tu nivel actual de estrés',
                 initialLevel: _nivelEstres,
                 onLevelChanged: (level) {

@@ -64,11 +64,15 @@ class StressService {
     }
   }
 
-  /// Disminuye el nivel de estrés en 1 (al terminar descanso)
+  /// Disminuye el nivel de estrés en 2 (al terminar descanso)
   /// El nivel mínimo es 1
   Future<void> decreaseStress() async {
     if (_stressLevel > 1) {
-      _stressLevel = _stressLevel - 1;
+      _stressLevel = _stressLevel - 2;
+      // Asegurar que no sea menor a 1
+      if (_stressLevel < 1) {
+        _stressLevel = 1;
+      }
       await _saveStressLevel();
       if (!_isDisposed && !_stressStream.isClosed) {
         _stressStream.add(_stressLevel);

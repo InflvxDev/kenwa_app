@@ -10,21 +10,28 @@ class HomeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      padding: const EdgeInsets.all(12.0),
+      child: Stack(
         children: [
-          Text(
-            'Kenwa',
-            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppColors.primary,
+          // Nombre centrado
+          Center(
+            child: Text(
+              'Kenwa',
+              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
           ),
-          IconButton(
-            onPressed: onSettingsPressed,
-            icon: const Icon(Icons.settings_outlined),
+          // Botón settings abajo a la derecha
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: IconButton(
+              onPressed: onSettingsPressed,
+              icon: const Icon(Icons.settings_outlined),
+            ),
           ),
         ],
       ),

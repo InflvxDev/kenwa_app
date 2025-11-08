@@ -4,6 +4,7 @@ import 'package:kenwa_app/app/theme/app_colors.dart';
 import 'package:kenwa_app/features/config/data/sources/configuracion_local_source.dart';
 import 'package:kenwa_app/features/config/domain/repositories/configuracion_repository.dart';
 import 'package:kenwa_app/features/config/domain/usecases/obtener_configuracion.dart';
+import 'package:kenwa_app/features/home/presentation/widgets/break_decision_modal.dart';
 import 'package:kenwa_app/features/home/presentation/widgets/home_header.dart';
 import 'package:kenwa_app/features/home/presentation/widgets/termometro_estres.dart';
 import 'package:kenwa_app/features/home/presentation/widgets/timer_controls.dart';
@@ -138,34 +139,66 @@ class _HomePageState extends State<HomePage> {
 
   void _handleTimerCompleted() async {
     // Usar _completedSessionType que se guardó ANTES de que se resetee el lastActiveState
-    final message = _completedSessionType == TimerState.working
-        ? '¡Hora de descansar!'
-        : (_completedSessionType == TimerState.breakActive
-              ? '¡Volvamos al trabajo!'
-              : '');
+    final wasWorkSession = _completedSessionType == TimerState.working;
+    final wasBreakSession = _completedSessionType == TimerState.breakActive;
 
     // Aumentar o disminuir estrés según el tipo de sesión completada
-    if (_completedSessionType == TimerState.working) {
+    if (wasWorkSession) {
       // Se completó trabajo, aumentar estrés
       await _stressService.increaseStress();
-    } else if (_completedSessionType == TimerState.breakActive) {
+
+      // Mostrar notificación del sistema
+      final notificationService = NotificationService();
+      await notificationService.showNotification(
+        id: 1,
+        title: 'Kenwa - ¡Trabajo Completado!',
+        body:
+            '¡Hora de descansar! Tómate un break para reducir tu nivel de estrés.',
+      );
+
+      // Mostrar modal de decisión para descansar o seguir trabajando
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => BreakDecisionModal(
+            stressLevel: _stressService.stressLevel,
+            onBreakPressed: () {
+              Navigator.pop(context);
+              _startBreak();
+            },
+            onContinueWorkPressed: () {
+              Navigator.pop(context);
+              _startTimer();
+            },
+          ),
+        );
+      }
+    } else if (wasBreakSession) {
       // Se completó descanso, disminuir estrés
       await _stressService.decreaseStress();
-    }
 
-    if (message.isNotEmpty) {
-      // Mostrar solo la notificación del sistema
+      // Mostrar notificación del sistema
       final notificationService = NotificationService();
-      notificationService.showNotification(
-        id: 1,
-        title: 'Kenwa',
-        body: message,
+      await notificationService.showNotification(
+        id: 2,
+        title: 'Kenwa - ¡Descanso Completado!',
+        body:
+            '¡Volvamos al trabajo! Te sientes más fresco y listo para continuar.',
       );
+
+      // Mostrar modal informativo
+      if (mounted) {
+        await BreakDecisionModal.showRestCompletedModal(context, () {
+          // Auto-iniciar el timer de trabajo cuando el usuario presiona OK
+          _startTimer();
+        }, _stressService.stressLevel);
+      }
     }
   }
 
   void _startTimer() {
-    if (_timerState == TimerState.idle) {
+    if (_timerState == TimerState.idle || _timerState == TimerState.completed) {
       _timerService.startWorkSession();
     }
   }
