@@ -208,42 +208,61 @@ class _HomePageState extends State<HomePage> {
           children: [
             // Header con el nombre de la app a la izquierda
             HomeHeader(onSettingsPressed: () => AppRouter.goSettings(context)),
-            // Contenido central con countdown
+            // Contenido central: Termómetro (izq) + Timer y Botones (der)
             Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 16.0,
+                ),
+                child: Row(
                   children: [
-                    // Etiqueta del estado actual
-                    TimerStatusLabel(timerState: _timerState),
-                    const SizedBox(height: 40),
-
-                    // Circular countdown display
-                    TimerDisplay(
-                      timerService: _timerService,
-                      remainingSeconds: _remainingSeconds,
+                    // Termómetro a la izquierda (compacto)
+                    SizedBox(
+                      width: 100,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: TermometroEstres(
+                              currentLevel: _currentStressLevel,
+                              maxLevel: 10,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 20),
 
-                    const SizedBox(height: 60),
+                    // Timer y Botones a la derecha (toma el resto del espacio)
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Etiqueta del estado actual
+                          TimerStatusLabel(timerState: _timerState),
+                          const SizedBox(height: 12),
 
-                    // Termómetro de estrés
-                    TermometroEstres(
-                      currentLevel: _currentStressLevel,
-                      maxLevel: 10,
-                    ),
+                          // Timer compacto
+                          TimerDisplay(
+                            timerService: _timerService,
+                            remainingSeconds: _remainingSeconds,
+                          ),
+                          const SizedBox(height: 16),
 
-                    const SizedBox(height: 60),
-
-                    // Botones de control
-                    TimerControls(
-                      timerState: _timerState,
-                      lastActiveState: _timerService.lastActiveState,
-                      onStart: _startTimer,
-                      onPause: _pauseTimer,
-                      onResume: _resumeTimer,
-                      onStop: _stopTimer,
-                      onBreakStart: _startBreak,
-                      onReset: _resetTimer,
+                          // Botones de control
+                          TimerControls(
+                            timerState: _timerState,
+                            lastActiveState: _timerService.lastActiveState,
+                            onStart: _startTimer,
+                            onPause: _pauseTimer,
+                            onResume: _resumeTimer,
+                            onStop: _stopTimer,
+                            onBreakStart: _startBreak,
+                            onReset: _resetTimer,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

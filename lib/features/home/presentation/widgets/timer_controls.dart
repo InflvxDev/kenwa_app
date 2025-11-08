@@ -27,136 +27,79 @@ class TimerControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // Botón de inicio
-        if (timerState == TimerState.idle)
-          ElevatedButton.icon(
-            onPressed: onStart,
-            icon: const Icon(Icons.play_arrow),
-            label: const Text('Comenzar Trabajo'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Botón de inicio
+          if (timerState == TimerState.idle)
+            ElevatedButton.icon(
+              onPressed: onStart,
+              icon: const Icon(Icons.play_arrow),
+              label: const Text('Comenzar Trabajo'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
-          ),
 
-        // Botón de pausa/resume
-        if (timerState == TimerState.working ||
-            timerState == TimerState.breakActive)
-          Row(
-            children: [
-              ElevatedButton.icon(
-                onPressed: onPause,
-                icon: const Icon(Icons.pause),
-                label: const Text('Pausar'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              OutlinedButton.icon(
-                onPressed: onStop,
-                icon: const Icon(Icons.stop),
-                label: const Text('Detener'),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(
-                    color: AppColors.foreground.withValues(alpha: 0.3),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-        // Botón de reanudar
-        if (timerState == TimerState.paused)
-          Row(
-            children: [
-              ElevatedButton.icon(
-                onPressed: onResume,
-                icon: const Icon(Icons.play_arrow),
-                label: const Text('Reanudar'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              OutlinedButton.icon(
-                onPressed: onStop,
-                icon: const Icon(Icons.stop),
-                label: const Text('Detener'),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(
-                    color: AppColors.foreground.withValues(alpha: 0.3),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-        // Botón de completado
-        if (timerState == TimerState.completed)
-          Row(
-            children: [
-              // Si el último estado activo fue trabajo, mostrar "Descansar"
-              // Si fue descanso, mostrar "Comenzar Trabajo"
-              if (lastActiveState == TimerState.working)
+          // Botones de pausa/detener
+          if (timerState == TimerState.working ||
+              timerState == TimerState.breakActive)
+            Column(
+              children: [
                 ElevatedButton.icon(
-                  onPressed: onBreakStart,
-                  icon: const Icon(Icons.emoji_food_beverage),
-                  label: const Text('Descansar'),
+                  onPressed: onPause,
+                  icon: const Icon(Icons.pause),
+                  label: const Text('Pausar'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
+                      horizontal: 20,
                       vertical: 16,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                )
-              else if (lastActiveState == TimerState.breakActive)
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: onStop,
+                  icon: const Icon(Icons.stop),
+                  label: const Text('Detener'),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      color: AppColors.foreground.withValues(alpha: 0.3),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+          // Botones de reanudar/detener
+          if (timerState == TimerState.paused)
+            Column(
+              children: [
                 ElevatedButton.icon(
-                  onPressed: onStart,
+                  onPressed: onResume,
                   icon: const Icon(Icons.play_arrow),
-                  label: const Text('Comenzar Trabajo'),
+                  label: const Text('Reanudar'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
@@ -169,27 +112,89 @@ class TimerControls extends StatelessWidget {
                     ),
                   ),
                 ),
-              const SizedBox(width: 16),
-              OutlinedButton.icon(
-                onPressed: onReset,
-                icon: const Icon(Icons.restart_alt),
-                label: const Text('Reiniciar'),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(
-                    color: AppColors.foreground.withValues(alpha: 0.3),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: onStop,
+                  icon: const Icon(Icons.stop),
+                  label: const Text('Detener'),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      color: AppColors.foreground.withValues(alpha: 0.3),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-      ],
+              ],
+            ),
+
+          // Botones de completado
+          if (timerState == TimerState.completed)
+            Column(
+              children: [
+                // Si el último estado activo fue trabajo, mostrar "Descansar"
+                // Si fue descanso, mostrar "Comenzar Trabajo"
+                if (lastActiveState == TimerState.working)
+                  ElevatedButton.icon(
+                    onPressed: onBreakStart,
+                    icon: const Icon(Icons.emoji_food_beverage),
+                    label: const Text('Descansar'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 16,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  )
+                else if (lastActiveState == TimerState.breakActive)
+                  ElevatedButton.icon(
+                    onPressed: onStart,
+                    icon: const Icon(Icons.play_arrow),
+                    label: const Text('Comenzar Trabajo'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 16,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: onReset,
+                  icon: const Icon(Icons.restart_alt),
+                  label: const Text('Reiniciar'),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      color: AppColors.foreground.withValues(alpha: 0.3),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
     );
   }
 }

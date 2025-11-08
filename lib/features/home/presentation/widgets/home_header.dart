@@ -20,6 +20,7 @@ class HomeHeader extends StatelessWidget {
               fontWeight: FontWeight.bold,
               color: AppColors.primary,
             ),
+            textAlign: TextAlign.center,
           ),
           IconButton(
             onPressed: onSettingsPressed,
