@@ -189,6 +189,66 @@ class NotificationService {
     );
   }
 
+  /// Mostrar notificación persistente del timer (aparece en barra de notificaciones y pantalla de bloqueo)
+  Future<void> showTimerNotification({
+    required String timeRemaining,
+    required String status,
+    bool isWorking = true,
+  }) async {
+    if (!_isInitialized) {
+      await initialize();
+    }
+
+    const int timerNotificationId =
+        100; // ID fijo para la notificación del timer
+
+    final AndroidNotificationDetails androidNotificationDetails =
+        AndroidNotificationDetails(
+          'kenwa_timer',
+          'Timer Kenwa',
+          channelDescription: 'Muestra el timer en curso',
+          importance: Importance.low, // Low para que no haga sonido/vibración
+          priority: Priority.low,
+          ongoing: true, // Hace que la notificación sea persistente
+          autoCancel: false, // No se cierra al tocarla
+          showWhen: false, // No mostrar timestamp
+          playSound: false,
+          enableVibration: false,
+          visibility:
+              NotificationVisibility.public, // Visible en pantalla de bloqueo
+          icon: '@mipmap/ic_launcher',
+          styleInformation: BigTextStyleInformation(
+            timeRemaining,
+            contentTitle: status,
+          ),
+        );
+
+    const DarwinNotificationDetails darwinNotificationDetails =
+        DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: false,
+          presentSound: false,
+        );
+
+    final NotificationDetails notificationDetails = NotificationDetails(
+      android: androidNotificationDetails,
+      iOS: darwinNotificationDetails,
+    );
+
+    await _flutterLocalNotificationsPlugin.show(
+      timerNotificationId,
+      status,
+      timeRemaining,
+      notificationDetails,
+    );
+  }
+
+  /// Cancelar la notificación persistente del timer
+  Future<void> cancelTimerNotification() async {
+    const int timerNotificationId = 100;
+    await _flutterLocalNotificationsPlugin.cancel(timerNotificationId);
+  }
+
   /// Cancelar una notificación
   Future<void> cancelNotification(int id) async {
     await _flutterLocalNotificationsPlugin.cancel(id);

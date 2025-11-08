@@ -85,6 +85,12 @@ class _HomePageState extends State<HomePage> {
     _timerStreamSubscription = _timerService.timerStream.listen((seconds) {
       if (mounted) {
         setState(() => _remainingSeconds = seconds);
+
+        // Actualizar notificación persistente cuando el timer está corriendo
+        if (_timerState == TimerState.working ||
+            _timerState == TimerState.breakActive) {
+          _updateTimerNotification();
+        }
       }
     });
 
@@ -98,6 +104,7 @@ class _HomePageState extends State<HomePage> {
             // El trabajo se completó, aumentar estrés
             _completedSessionType = TimerState.working;
             _wasInBreak = false;
+            _cancelTimerNotification(); // Cancelar notificación al completar
             _handleTimerCompleted();
           }
           // Detectar cuando se completa un DESCANSO (break que llega a 0 segundos)
@@ -109,6 +116,7 @@ class _HomePageState extends State<HomePage> {
             _breakJustCompleted = true;
             _completedSessionType = TimerState.breakActive;
             _wasInBreak = false;
+            _cancelTimerNotification(); // Cancelar notificación al completar
             _handleTimerCompleted();
           }
           // Si el estado cambia a idle
@@ -116,6 +124,11 @@ class _HomePageState extends State<HomePage> {
             // Usuario presionó reset, resetear flags
             _breakJustCompleted = false;
             _wasInBreak = false;
+            _cancelTimerNotification(); // Cancelar notificación al hacer reset
+          }
+          // Si el estado cambia a paused
+          else if (state == TimerState.paused) {
+            _cancelTimerNotification(); // Cancelar notificación al pausar
           }
           // Si iniciamos un nuevo timer (working o breakActive)
           else if (state == TimerState.working ||
@@ -123,6 +136,7 @@ class _HomePageState extends State<HomePage> {
             // Rastrear si iniciamos un break
             _wasInBreak = (state == TimerState.breakActive);
             _breakJustCompleted = false;
+            _updateTimerNotification(); // Mostrar notificación al iniciar
           }
         });
       }
@@ -135,6 +149,33 @@ class _HomePageState extends State<HomePage> {
         setState(() => _currentStressLevel = level);
       }
     });
+  }
+
+  /// Actualizar la notificación persistente del timer
+  void _updateTimerNotification() {
+    final notificationService = NotificationService();
+    final timeString = _timerService.formatTime(_remainingSeconds);
+
+    String status;
+    if (_timerState == TimerState.working) {
+      status = 'Trabajando';
+    } else if (_timerState == TimerState.breakActive) {
+      status = 'Descansando';
+    } else {
+      return; // No mostrar notificación si no está corriendo
+    }
+
+    notificationService.showTimerNotification(
+      timeRemaining: timeString,
+      status: status,
+      isWorking: _timerState == TimerState.working,
+    );
+  }
+
+  /// Cancelar la notificación persistente del timer
+  void _cancelTimerNotification() {
+    final notificationService = NotificationService();
+    notificationService.cancelTimerNotification();
   }
 
   void _handleTimerCompleted() async {
@@ -313,6 +354,10 @@ class _HomePageState extends State<HomePage> {
     _timerStreamSubscription.cancel();
     _stateStreamSubscription.cancel();
     _stressStreamSubscription.cancel();
+    // Cancelar notificación del timer al salir de la página
+    // NOTA: Solo cancelamos si el timer NO está corriendo, para que siga visible
+    // si el usuario navega a otra página con el timer activo
+    // _cancelTimerNotification();
     // NO llamamos dispose() en los servicios singleton porque se reutilizan
     // Solo cancelamos las subscripciones de este widget
     super.dispose();
