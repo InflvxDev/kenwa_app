@@ -5,6 +5,7 @@ class Configuracion {
   final int intervaloDescansos; // en minutos
   final int tiempoDescanso; // en minutos
   final bool notificacionesActivas;
+  final int nivelEstresInicial; // 1, 4, 7 o 10
   final DateTime fechaCreacion;
 
   Configuracion({
@@ -13,6 +14,7 @@ class Configuracion {
     required this.intervaloDescansos,
     required this.tiempoDescanso,
     required this.notificacionesActivas,
+    this.nivelEstresInicial = 1,
     DateTime? fechaCreacion,
   }) : fechaCreacion = fechaCreacion ?? DateTime.now();
 }

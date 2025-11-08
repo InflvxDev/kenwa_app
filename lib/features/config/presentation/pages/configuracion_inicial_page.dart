@@ -12,6 +12,7 @@ import 'package:kenwa_app/features/config/presentation/widgets/frecuencia_slider
 import 'package:kenwa_app/features/config/presentation/widgets/horario_input.dart';
 import 'package:kenwa_app/features/config/presentation/widgets/nivel_estres_selector.dart';
 import 'package:kenwa_app/services/notification_service.dart';
+import 'package:kenwa_app/services/stress_service.dart';
 
 /// Página de configuración inicial del usuario
 class ConfiguracionInicialPage extends StatefulWidget {
@@ -29,7 +30,7 @@ class _ConfiguracionInicialPageState extends State<ConfiguracionInicialPage> {
   late int _intervaloDescansos;
   late int _tiempoDescanso;
   late bool _notificacionesActivas;
-  late int _nivelEstres;
+  late int _nivelEstres; // Valor externo: 1, 4, 7 o 10
 
   @override
   void initState() {
@@ -56,7 +57,7 @@ class _ConfiguracionInicialPageState extends State<ConfiguracionInicialPage> {
     _intervaloDescansos = 60; // minutos
     _tiempoDescanso = 5; // minutos
     _notificacionesActivas = false;
-    _nivelEstres = 2;
+    _nivelEstres = 1; // Bajo (valor externo)
   }
 
   Future<void> _guardarConfiguracion() async {
@@ -66,6 +67,7 @@ class _ConfiguracionInicialPageState extends State<ConfiguracionInicialPage> {
       intervaloDescansos: _intervaloDescansos,
       tiempoDescanso: _tiempoDescanso,
       notificacionesActivas: _notificacionesActivas,
+      nivelEstresInicial: _nivelEstres,
     );
 
     final success = await _controller.guardarConfiguracion(configuracion);
@@ -73,6 +75,13 @@ class _ConfiguracionInicialPageState extends State<ConfiguracionInicialPage> {
     if (!mounted) return;
 
     if (success) {
+      // Inicializar el servicio de estrés con el nivel seleccionado
+      final stressService = StressService();
+      await stressService.initialize();
+      await stressService.setStressLevel(_nivelEstres);
+
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Configuración guardada exitosamente')),
       );
@@ -83,6 +92,8 @@ class _ConfiguracionInicialPageState extends State<ConfiguracionInicialPage> {
         }
       });
     } else {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(_controller.errorMessage ?? 'Error al guardar')),
       );

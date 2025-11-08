@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 /// Widget para seleccionar el nivel de estrés inicial
+/// Mapea los valores internos 1-4 a valores externos 1, 4, 7, 10
 class NivelEstresSelector extends StatefulWidget {
   final String label;
   final String subLabel;
-  final int initialLevel;
-  final Function(int) onLevelChanged;
+  final int initialLevel; // Valor externo: 1, 4, 7 o 10
+  final Function(int) onLevelChanged; // Retorna valor externo: 1, 4, 7 o 10
 
   const NivelEstresSelector({
     super.key,
@@ -20,12 +21,45 @@ class NivelEstresSelector extends StatefulWidget {
 }
 
 class _NivelEstresSelectorState extends State<NivelEstresSelector> {
-  late int _selectedLevel;
+  late int _selectedInternalLevel; // 1-4
 
   @override
   void initState() {
     super.initState();
-    _selectedLevel = widget.initialLevel;
+    // Convertir valor externo a interno
+    _selectedInternalLevel = _externalToInternal(widget.initialLevel);
+  }
+
+  /// Mapea valores externos (1, 4, 7, 10) a internos (1, 2, 3, 4)
+  int _externalToInternal(int externalValue) {
+    switch (externalValue) {
+      case 1:
+        return 1;
+      case 4:
+        return 2;
+      case 7:
+        return 3;
+      case 10:
+        return 4;
+      default:
+        return 1;
+    }
+  }
+
+  /// Mapea valores internos (1, 2, 3, 4) a externos (1, 4, 7, 10)
+  int _internalToExternal(int internalValue) {
+    switch (internalValue) {
+      case 1:
+        return 1;
+      case 2:
+        return 4;
+      case 3:
+        return 7;
+      case 4:
+        return 10;
+      default:
+        return 1;
+    }
   }
 
   String _getNivelLabel(int level) {
@@ -91,7 +125,7 @@ class _NivelEstresSelectorState extends State<NivelEstresSelector> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(4, (index) {
             final level = index + 1;
-            final isSelected = _selectedLevel == level;
+            final isSelected = _selectedInternalLevel == level;
 
             return Expanded(
               child: Padding(
@@ -99,8 +133,9 @@ class _NivelEstresSelectorState extends State<NivelEstresSelector> {
                 child: GestureDetector(
                   onTap: () {
                     setState(() {
-                      _selectedLevel = level;
-                      widget.onLevelChanged(_selectedLevel);
+                      _selectedInternalLevel = level;
+                      // Convertir a valor externo antes de llamar callback
+                      widget.onLevelChanged(_internalToExternal(level));
                     });
                   },
                   child: Container(

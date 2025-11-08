@@ -8,6 +8,7 @@ class ConfiguracionModel extends Configuracion {
     required super.intervaloDescansos,
     required super.tiempoDescanso,
     required super.notificacionesActivas,
+    super.nivelEstresInicial = 1,
     super.fechaCreacion,
   });
 
@@ -19,6 +20,7 @@ class ConfiguracionModel extends Configuracion {
       'intervaloDescansos': intervaloDescansos,
       'tiempoDescanso': tiempoDescanso,
       'notificacionesActivas': notificacionesActivas,
+      'nivelEstresInicial': nivelEstresInicial,
       'fechaCreacion': fechaCreacion.toIso8601String(),
     };
   }
@@ -31,6 +33,7 @@ class ConfiguracionModel extends Configuracion {
       intervaloDescansos: json['intervaloDescansos'],
       tiempoDescanso: json['tiempoDescanso'],
       notificacionesActivas: json['notificacionesActivas'],
+      nivelEstresInicial: json['nivelEstresInicial'] ?? 1,
       fechaCreacion: DateTime.parse(json['fechaCreacion']),
     );
   }
@@ -42,6 +45,7 @@ class ConfiguracionModel extends Configuracion {
     int? intervaloDescansos,
     int? tiempoDescanso,
     bool? notificacionesActivas,
+    int? nivelEstresInicial,
     DateTime? fechaCreacion,
   }) {
     return ConfiguracionModel(
@@ -51,6 +55,7 @@ class ConfiguracionModel extends Configuracion {
       tiempoDescanso: tiempoDescanso ?? this.tiempoDescanso,
       notificacionesActivas:
           notificacionesActivas ?? this.notificacionesActivas,
+      nivelEstresInicial: nivelEstresInicial ?? this.nivelEstresInicial,
       fechaCreacion: fechaCreacion ?? this.fechaCreacion,
     );
   }

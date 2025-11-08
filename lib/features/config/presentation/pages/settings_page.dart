@@ -12,6 +12,7 @@ import 'package:kenwa_app/features/config/presentation/widgets/frecuencia_slider
 import 'package:kenwa_app/features/config/presentation/widgets/horario_input.dart';
 import 'package:kenwa_app/features/config/presentation/widgets/nivel_estres_selector.dart';
 import 'package:kenwa_app/services/notification_service.dart';
+import 'package:kenwa_app/services/stress_service.dart';
 import 'package:kenwa_app/services/timer_service.dart';
 
 /// Página de configuración editable desde el home
@@ -30,7 +31,7 @@ class _SettingsPageState extends State<SettingsPage> {
   late int _intervaloDescansos;
   late int _tiempoDescanso;
   late bool _notificacionesActivas;
-  late int _nivelEstres;
+  late int _nivelEstres; // Valor externo: 1, 4, 7 o 10
 
   @override
   void initState() {
@@ -53,16 +54,24 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _loadConfiguration() async {
     try {
+      // Inicializar StressService para cargar valores persistidos
+      final stressService = StressService();
+      await stressService.initialize();
+
       final config = await _controller.obtenerConfiguracion();
 
       if (config != null) {
+        // Usar el valor del StressService como fuente de verdad para el nivel de estrés
+        final stressLevel = stressService.stressLevel;
+
         setState(() {
           _horaInicio = config.horaInicio;
           _horaFin = config.horaFin;
           _intervaloDescansos = config.intervaloDescansos;
           _tiempoDescanso = config.tiempoDescanso;
           _notificacionesActivas = config.notificacionesActivas;
-          _nivelEstres = 2; // Default, can be extended if stored
+          // Usar el nivel de estrés actual
+          _nivelEstres = stressLevel;
           _isLoading = false;
         });
       } else {
@@ -82,7 +91,7 @@ class _SettingsPageState extends State<SettingsPage> {
       _intervaloDescansos = 60;
       _tiempoDescanso = 5;
       _notificacionesActivas = false;
-      _nivelEstres = 2;
+      _nivelEstres = 1;
       _isLoading = false;
     });
   }
@@ -94,6 +103,7 @@ class _SettingsPageState extends State<SettingsPage> {
       intervaloDescansos: _intervaloDescansos,
       tiempoDescanso: _tiempoDescanso,
       notificacionesActivas: _notificacionesActivas,
+      nivelEstresInicial: _nivelEstres,
     );
 
     final success = await _controller.guardarConfiguracion(configuracion);
@@ -101,6 +111,13 @@ class _SettingsPageState extends State<SettingsPage> {
     if (!mounted) return;
 
     if (success) {
+      // Actualizar el nivel de estrés si cambió
+      final stressService = StressService();
+      await stressService.initialize();
+      await stressService.setStressLevel(_nivelEstres);
+
+      if (!mounted) return;
+
       // Resetear el timer cuando se guarda nueva configuración
       TimerService().reset();
 
@@ -108,10 +125,10 @@ class _SettingsPageState extends State<SettingsPage> {
         const SnackBar(content: Text('Configuración guardada exitosamente')),
       );
       // Ir al home
-      if (mounted) {
-        context.go('/home');
-      }
+      context.go('/home');
     } else {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(_controller.errorMessage ?? 'Error al guardar')),
       );
