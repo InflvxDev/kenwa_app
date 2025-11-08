@@ -313,8 +313,8 @@ class _HomePageState extends State<HomePage> {
     _timerStreamSubscription.cancel();
     _stateStreamSubscription.cancel();
     _stressStreamSubscription.cancel();
-    _timerService.dispose();
-    _stressService.dispose();
+    // NO llamamos dispose() en los servicios singleton porque se reutilizan
+    // Solo cancelamos las subscripciones de este widget
     super.dispose();
   }
 }
