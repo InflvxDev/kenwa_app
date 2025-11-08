@@ -21,7 +21,7 @@ class NotificationService {
     if (_isInitialized) return;
 
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('app_icon');
+        AndroidInitializationSettings('@mipmap/ic_launcher');
 
     final DarwinInitializationSettings initializationSettingsDarwin =
         DarwinInitializationSettings(
@@ -121,10 +121,12 @@ class NotificationService {
         AndroidNotificationDetails(
           'kenwa_notifications',
           'Notificaciones Kenwa',
-          channelDescription: 'Notificaciones de descanso y bienestar',
+          channelDescription: 'Recordatorios de descanso y bienestar',
           importance: Importance.max,
           priority: Priority.high,
-          ticker: 'Kenwa',
+          playSound: true,
+          enableVibration: true,
+          visibility: NotificationVisibility.public,
         );
 
     const DarwinNotificationDetails darwinNotificationDetails =
@@ -159,14 +161,15 @@ class NotificationService {
 
     const AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(
-          'kenwa_periodic_notifications',
-          'Notificaciones Periódicas Kenwa',
-          channelDescription: 'Recordatorios periódicos de descanso',
+          'kenwa_notifications',
+          'Notificaciones Kenwa',
+          channelDescription: 'Recordatorios de descanso y bienestar',
           importance: Importance.max,
           priority: Priority.high,
-          ticker: 'Kenwa Recordatorio',
+          playSound: true,
+          enableVibration: true,
+          visibility: NotificationVisibility.public,
         );
-
     const DarwinNotificationDetails darwinNotificationDetails =
         DarwinNotificationDetails();
 
