@@ -16,6 +16,7 @@ class EstadoAnimoModal extends StatefulWidget {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => const Dialog(
+        backgroundColor: Colors.white,
         insetPadding: EdgeInsets.symmetric(horizontal: 24),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(16)),
@@ -40,7 +41,11 @@ class _EstadoAnimoModalState extends State<EstadoAnimoModal> {
     final stressService = StressService();
     await stressService.initialize();
     setState(() {
-      _selectedLevel = stressService.stressLevel;
+
+      if (_selectedLevel != 1){
+        _selectedLevel = stressService.stressLevel;
+      }
+      
     });
   }
 
@@ -61,20 +66,9 @@ class _EstadoAnimoModalState extends State<EstadoAnimoModal> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            '¿Cómo te sientes hoy?',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 5),
-          const Text(
-            'Selecciona tu nivel actual de estrés',
-            style: TextStyle(fontSize: 14),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 1),
           NivelEstresSelector(
-            label: '',
-            subLabel: '',
+            label: 'Hola de nuevo, ¿Cómo te sientes?',
+            subLabel: 'Selecciona tu nivel actual de estrés',
             initialLevel: _selectedLevel,
             onLevelChanged: (value) {
               setState(() => _selectedLevel = value);

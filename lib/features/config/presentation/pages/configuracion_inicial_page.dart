@@ -9,7 +9,6 @@ import 'package:kenwa_app/features/config/domain/usecases/obtener_configuracion.
 import 'package:kenwa_app/features/config/presentation/controllers/configuracion_controller.dart';
 import 'package:kenwa_app/features/config/presentation/widgets/boton_guardar.dart';
 import 'package:kenwa_app/features/config/presentation/widgets/frecuencia_slider.dart';
-import 'package:kenwa_app/features/config/presentation/widgets/nivel_estres_selector.dart';
 import 'package:kenwa_app/services/notification_service.dart';
 import 'package:kenwa_app/services/stress_service.dart';
 
@@ -180,16 +179,16 @@ class _ConfiguracionInicialPageState extends State<ConfiguracionInicialPage> {
               ),
               const SizedBox(height: 32),
 
-              // Sección de Nivel de Estrés
-              NivelEstresSelector(
-                label: 'Nivel de estrés',
-                subLabel: 'Selecciona tu nivel actual de estrés',
-                initialLevel: _nivelEstres,
-                onLevelChanged: (level) {
-                  setState(() => _nivelEstres = level);
-                },
-              ),
-              const SizedBox(height: 32),
+              // // Sección de Nivel de Estrés
+              // NivelEstresSelector(
+              //   label: 'Nivel de estrés',
+              //   subLabel: 'Selecciona tu nivel actual de estrés',
+              //   initialLevel: _nivelEstres,
+              //   onLevelChanged: (level) {
+              //     setState(() => _nivelEstres = level);
+              //   },
+              // ),
+              // const SizedBox(height: 32),
 
               // Sección de Notificaciones
               Container(
