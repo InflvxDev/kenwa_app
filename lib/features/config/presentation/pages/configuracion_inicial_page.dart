@@ -9,7 +9,6 @@ import 'package:kenwa_app/features/config/domain/usecases/obtener_configuracion.
 import 'package:kenwa_app/features/config/presentation/controllers/configuracion_controller.dart';
 import 'package:kenwa_app/features/config/presentation/widgets/boton_guardar.dart';
 import 'package:kenwa_app/features/config/presentation/widgets/frecuencia_slider.dart';
-import 'package:kenwa_app/features/config/presentation/widgets/horario_input.dart';
 import 'package:kenwa_app/features/config/presentation/widgets/nivel_estres_selector.dart';
 import 'package:kenwa_app/services/notification_service.dart';
 import 'package:kenwa_app/services/stress_service.dart';
@@ -123,30 +122,30 @@ class _ConfiguracionInicialPageState extends State<ConfiguracionInicialPage> {
               ),
               const SizedBox(height: 32),
 
-              // Sección de Jornada Laboral
-              Text(
-                'Jornada Laboral',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontSize: 18),
-              ),
-              const SizedBox(height: 16),
-              HorarioInput(
-                label: 'Hora de inicio',
-                initialTime: _horaInicio,
-                onTimeChanged: (time) {
-                  setState(() => _horaInicio = time);
-                },
-              ),
-              const SizedBox(height: 16),
-              HorarioInput(
-                label: 'Hora de fin',
-                initialTime: _horaFin,
-                onTimeChanged: (time) {
-                  setState(() => _horaFin = time);
-                },
-              ),
-              const SizedBox(height: 32),
+              // // Sección de Jornada Laboral
+              // Text(
+              //   'Jornada Laboral',
+              //   style: Theme.of(
+              //     context,
+              //   ).textTheme.titleLarge?.copyWith(fontSize: 18),
+              // ),
+              // const SizedBox(height: 16),
+              // HorarioInput(
+              //   label: 'Hora de inicio',
+              //   initialTime: _horaInicio,
+              //   onTimeChanged: (time) {
+              //     setState(() => _horaInicio = time);
+              //   },
+              // ),
+              // const SizedBox(height: 16),
+              // HorarioInput(
+              //   label: 'Hora de fin',
+              //   initialTime: _horaFin,
+              //   onTimeChanged: (time) {
+              //     setState(() => _horaFin = time);
+              //   },
+              // ),
+              // const SizedBox(height: 32),
 
               // Sección de Intervalos
               Text(

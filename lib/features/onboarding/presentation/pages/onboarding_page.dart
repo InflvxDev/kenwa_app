@@ -22,23 +22,23 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final List<OnboardingStep> onboardingSteps = [
     OnboardingStep(
       id: 1,
-      title: 'Cuida tu mente mientras trabajas.',
+      title: 'Cuida tu mente mientras trabajas',
       description:
-          'Con Kenwa te ayudamos a mantener un equilibrio saludable entre tu bienestar mental y tu productividad laboral.',
+          'Con Kenwa te ayudamos a mantener un equilibrio saludable entre tu bienestar mental y tu productividad laboral',
       icon: 'mind',
     ),
     OnboardingStep(
       id: 2,
       title: 'Descansos guiados',
       description:
-          'Te ayudamos a mantener el ritmo con pausas activas personalizadas que revitalizarán tu energía.',
+          'Te ayudamos a mantener el ritmo con pausas activas personalizadas que revitalizarán tu energía',
       icon: 'rest',
     ),
     OnboardingStep(
       id: 3,
       title: 'Termómetro de estrés',
       description:
-          'Mide tu nivel de estrés en tiempo real y mejora tu bienestar con recomendaciones personalizadas.',
+          'Mide tu nivel de estrés en tiempo real y mejora tu bienestar con recomendaciones personalizadas',
       icon: 'stress',
     ),
   ];
