@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kenwa_app/app/theme/app_colors.dart';
+import 'package:kenwa_app/features/home/presentation/widgets/estado_animo_modal.dart';
 
 /// Widget que muestra un termómetro visual del nivel de estrés con graduaciones
 class TermometroEstres extends StatefulWidget {
@@ -90,11 +91,11 @@ class _TermometroEstresState extends State<TermometroEstres>
   String _getLevelLabel(double level) {
     if (level <= 1) {
       return 'Tranquilo';
-    } else if (level <= 2) {
+    } else if (level <= 3) {
       return 'Relajado';
-    } else if (level <= 4) {
+    } else if (level <= 6) {
       return 'Normal';
-    } else if (level <= 7) {
+    } else if (level <= 8) {
       return 'Estresado';
     } else {
       return 'Muy Estresado';
@@ -105,11 +106,11 @@ class _TermometroEstresState extends State<TermometroEstres>
   String _getEmoji(double level) {
     if (level <= 1) {
       return '😌';
-    } else if (level <= 2) {
+    } else if (level <= 3) {
       return '🙂';
-    } else if (level <= 4) {
+    } else if (level <= 6) {
       return '😐';
-    } else if (level <= 7) {
+    } else if (level <= 8) {
       return '😟';
     } else {
       return '😤';
@@ -139,13 +140,18 @@ class _TermometroEstresState extends State<TermometroEstres>
               ),
             ),
             const SizedBox(height: 8),
-            
+
             // Emoji grande
-            Text(
-              _getEmoji(currentLevel),
-              style: const TextStyle(
-                fontSize: 42,
-                height: 1.0,
+            GestureDetector(
+              onTap: () async {
+                await EstadoAnimoModal.show(context);
+                setState(
+                  () {},
+                ); // Para refrescar el termómetro si el nivel cambia
+              },
+              child: Text(
+                _getEmoji(currentLevel),
+                style: const TextStyle(fontSize: 42, height: 1.0),
               ),
             ),
             const SizedBox(height: 16),
@@ -185,8 +191,12 @@ class _TermometroEstresState extends State<TermometroEstres>
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
                                   colors: [
-                                    AppColors.foreground.withValues(alpha: 0.05),
-                                    AppColors.foreground.withValues(alpha: 0.08),
+                                    AppColors.foreground.withValues(
+                                      alpha: 0.05,
+                                    ),
+                                    AppColors.foreground.withValues(
+                                      alpha: 0.08,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -208,7 +218,9 @@ class _TermometroEstresState extends State<TermometroEstres>
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: AppColors.primary.withValues(alpha: 0.4),
+                                      color: AppColors.primary.withValues(
+                                        alpha: 0.4,
+                                      ),
                                       blurRadius: 8,
                                       spreadRadius: 2,
                                     ),
