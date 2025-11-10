@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:kenwa_app/app/router.dart';
 import 'package:kenwa_app/app/theme/app_colors.dart';
 import 'package:kenwa_app/features/config/data/sources/configuracion_local_source.dart';
@@ -190,10 +191,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _handleTimerCompleted() async {
-
     //Sonido de alarma al finalizar cualquier sesión
     await SoundService.playAlarm();
-    
+
     // Usar _completedSessionType que se guardó ANTES de que se resetee el lastActiveState
     final wasWorkSession = _completedSessionType == TimerState.working;
     final wasBreakSession = _completedSessionType == TimerState.breakActive;
@@ -261,6 +261,17 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _currentStressLevel = _stressService.stressLevel;
       });
+    }
+  }
+
+  String _getImageForState(TimerState state) {
+    switch (state) {
+      case TimerState.working:
+        return 'assets/images/working.svg';
+      case TimerState.breakActive:
+        return 'assets/images/break.svg';
+      default:
+        return 'assets/images/working.svg'; // o puedes reutilizar una
     }
   }
 
@@ -360,6 +371,14 @@ class _HomePageState extends State<HomePage> {
                             onStop: _stopTimer,
                             onBreakStart: _startBreak,
                             onReset: _resetTimer,
+                          ),
+
+                          const SizedBox(height: 60),
+
+                          // Imagen que cambia según el estado del timer
+                          SvgPicture.asset(
+                            _getImageForState(_timerState),
+                            height: 140,
                           ),
                         ],
                       ),
