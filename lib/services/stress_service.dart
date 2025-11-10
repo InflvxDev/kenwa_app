@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Servicio para gestionar el nivel de estrés del usuario
 class StressService {
   static final StressService _instance = StressService._internal();
+  static bool _modalMostrado = false;
 
   factory StressService() {
     return _instance;
@@ -91,5 +92,11 @@ class StressService {
       _stressStream.close();
     }
     _isDisposed = true;
+  }
+
+  static bool get modalMostrado => _modalMostrado;
+
+  static void marcarModalMostrado() {
+    _modalMostrado = true;
   }
 }

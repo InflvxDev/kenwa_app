@@ -10,6 +10,7 @@ import 'package:kenwa_app/features/home/presentation/widgets/termometro_estres.d
 import 'package:kenwa_app/features/home/presentation/widgets/timer_controls.dart';
 import 'package:kenwa_app/features/home/presentation/widgets/timer_display.dart';
 import 'package:kenwa_app/features/home/presentation/widgets/timer_status_label.dart';
+import 'package:kenwa_app/features/home/presentation/widgets/estado_animo_modal.dart';
 import 'package:kenwa_app/services/notification_service.dart';
 import 'package:kenwa_app/services/stress_service.dart';
 import 'package:kenwa_app/services/timer_service.dart';
@@ -50,6 +51,15 @@ class _HomePageState extends State<HomePage> {
     _loadConfiguration();
     _setupTimerListeners();
     _setupStressListeners();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future(() async {
+        if (!StressService.modalMostrado) {
+          await _mostrarEstadoAnimoModal();
+          StressService.marcarModalMostrado();
+        }
+      });
+    });
   }
 
   void _loadConfiguration() async {
@@ -235,6 +245,17 @@ class _HomePageState extends State<HomePage> {
           _startTimer();
         }, _stressService.stressLevel);
       }
+    }
+  }
+
+  Future<void> _mostrarEstadoAnimoModal() async {
+    await Future.delayed(const Duration(milliseconds: 400)); // breve pausa
+    if (mounted) {
+      await EstadoAnimoModal.show(context);
+      // Actualizar el termómetro después de que se guarde el nuevo nivel
+      setState(() {
+        _currentStressLevel = _stressService.stressLevel;
+      });
     }
   }
 
