@@ -36,7 +36,7 @@ class BreakDecisionModal extends StatelessWidget {
     '¡Vas bien! ¿Necesitas un respiro?',
     'Tu progreso es sólido. ¿Descansemos?',
     'Has trabajado bastante. ¿Un break?',
-    '¡Mírate go! ¿Quieres tomarte un descanso?',
+    '¡Mírate bro! ¿Quieres tomarte un descanso?',
     'Tu enfoque es admirable. ¿Descansamos?',
   ];
 

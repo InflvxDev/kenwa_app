@@ -86,17 +86,33 @@ class _TermometroEstresState extends State<TermometroEstres>
     }
   }
 
+  // Ahora devuelve solo el texto sin emoji
   String _getLevelLabel(double level) {
     if (level <= 1) {
-      return 'Tranquilo 😌';
+      return 'Tranquilo';
     } else if (level <= 2) {
-      return 'Relajado 🙂';
+      return 'Relajado';
     } else if (level <= 4) {
-      return 'Normal 😐';
+      return 'Normal';
     } else if (level <= 7) {
-      return 'Estresado 😟';
+      return 'Estresado';
     } else {
-      return 'Muy Estresado 😤';
+      return 'Muy Estresado';
+    }
+  }
+
+  // Nueva función para obtener solo el emoji
+  String _getEmoji(double level) {
+    if (level <= 1) {
+      return '😌';
+    } else if (level <= 2) {
+      return '🙂';
+    } else if (level <= 4) {
+      return '😐';
+    } else if (level <= 7) {
+      return '😟';
+    } else {
+      return '😤';
     }
   }
 
@@ -113,6 +129,27 @@ class _TermometroEstresState extends State<TermometroEstres>
         return Column(
           mainAxisSize: MainAxisSize.max,
           children: [
+            // Etiqueta con emoji grande arriba
+            Text(
+              _getLevelLabel(currentLevel),
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: primaryColor,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.3,
+              ),
+            ),
+            const SizedBox(height: 8),
+            
+            // Emoji grande
+            Text(
+              _getEmoji(currentLevel),
+              style: const TextStyle(
+                fontSize: 42,
+                height: 1.0,
+              ),
+            ),
+            const SizedBox(height: 16),
+
             // Contenedor con termómetro (expandible)
             Expanded(
               child: Center(
@@ -124,26 +161,38 @@ class _TermometroEstresState extends State<TermometroEstres>
                       width: _thermometerWidth,
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: AppColors.foreground.withValues(alpha: 0.3),
-                          width: 1.5,
+                          color: AppColors.foreground.withValues(alpha: 0.2),
+                          width: 2,
                         ),
                         borderRadius: BorderRadius.circular(28),
+                        boxShadow: [
+                          BoxShadow(
+                            color: primaryColor.withValues(alpha: 0.15),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(26),
                         child: Stack(
                           alignment: Alignment.bottomCenter,
                           children: [
-                            // Fondo completo
+                            // Fondo completo con gradiente sutil
                             Container(
                               decoration: BoxDecoration(
-                                color: AppColors.foreground.withValues(
-                                  alpha: 0.08,
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    AppColors.foreground.withValues(alpha: 0.05),
+                                    AppColors.foreground.withValues(alpha: 0.08),
+                                  ],
                                 ),
                               ),
                             ),
 
-                            // Base inferior siempre verde (primary)
+                            // Base inferior siempre verde (primary) con resplandor
                             Positioned(
                               bottom: 0,
                               left: 0,
@@ -154,14 +203,21 @@ class _TermometroEstresState extends State<TermometroEstres>
                                   gradient: RadialGradient(
                                     colors: [
                                       AppColors.primary,
-                                      AppColors.primary.withValues(alpha: 0.8),
+                                      AppColors.primary.withValues(alpha: 0.85),
                                     ],
                                   ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.primary.withValues(alpha: 0.4),
+                                      blurRadius: 8,
+                                      spreadRadius: 2,
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
 
-                            // Relleno con gradiente (encima de la base)
+                            // Relleno con gradiente mejorado
                             Positioned(
                               bottom: 0,
                               left: 0,
@@ -173,24 +229,48 @@ class _TermometroEstresState extends State<TermometroEstres>
                                     begin: Alignment.bottomCenter,
                                     end: Alignment.topCenter,
                                     colors: gradientColors,
+                                    stops: const [0.0, 0.9],
                                   ),
                                 ),
                               ),
                             ),
 
-                            // Graduaciones
+                            // Brillo superior en el líquido
+                            Positioned(
+                              bottom: height * percentage * 0.9,
+                              left: 0,
+                              right: 0,
+                              child: Container(
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.white.withValues(alpha: 0.0),
+                                      Colors.white.withValues(alpha: 0.3),
+                                      Colors.white.withValues(alpha: 0.0),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            // Graduaciones mejoradas
                             ...List.generate(10, (index) {
                               final level = 10 - index;
                               final positionFromBottom = (index * height) / 9;
+                              final isEven = level % 2 == 0;
 
                               return Positioned(
                                 bottom: positionFromBottom,
-                                right: 2,
+                                right: 3,
                                 child: Container(
-                                  width: level % 2 == 0 ? 6 : 4,
-                                  height: 1,
-                                  color: AppColors.foreground.withValues(
-                                    alpha: 0.4,
+                                  width: isEven ? 8 : 5,
+                                  height: isEven ? 1.5 : 1,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.foreground.withValues(
+                                      alpha: isEven ? 0.5 : 0.3,
+                                    ),
+                                    borderRadius: BorderRadius.circular(1),
                                   ),
                                 ),
                               );
@@ -203,32 +283,43 @@ class _TermometroEstresState extends State<TermometroEstres>
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
 
-            // Título arriba de los números
-            Text(
-              'Nivel de Estrés',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: AppColors.foreground,
-                fontWeight: FontWeight.w600,
+            // Título
+            Center(
+              child: Text(
+                'Nivel de Estrés',
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.visible,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: AppColors.foreground.withValues(alpha: 0.7),
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.3,
+                  fontSize: 13,
+                ),
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
 
-            // Valor numérico y etiqueta
-            Text(
-              '${currentLevel.toStringAsFixed(0)}/10',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: primaryColor,
-                fontWeight: FontWeight.bold,
+            // Valor numérico con estilo mejorado
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: primaryColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: primaryColor.withValues(alpha: 0.3),
+                  width: 1,
+                ),
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              _getLevelLabel(currentLevel),
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: primaryColor,
-                fontWeight: FontWeight.w500,
+              child: Text(
+                '${currentLevel.toStringAsFixed(0)}/10',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: primaryColor,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                ),
               ),
             ),
           ],
