@@ -12,6 +12,7 @@ import 'package:kenwa_app/features/home/presentation/widgets/timer_display.dart'
 import 'package:kenwa_app/features/home/presentation/widgets/timer_status_label.dart';
 import 'package:kenwa_app/features/home/presentation/widgets/estado_animo_modal.dart';
 import 'package:kenwa_app/services/notification_service.dart';
+import 'package:kenwa_app/services/sound_service.dart';
 import 'package:kenwa_app/services/stress_service.dart';
 import 'package:kenwa_app/services/timer_service.dart';
 import 'dart:async';
@@ -189,6 +190,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _handleTimerCompleted() async {
+
+    //Sonido de alarma al finalizar cualquier sesión
+    await SoundService.playAlarm();
+    
     // Usar _completedSessionType que se guardó ANTES de que se resetee el lastActiveState
     final wasWorkSession = _completedSessionType == TimerState.working;
     final wasBreakSession = _completedSessionType == TimerState.breakActive;
