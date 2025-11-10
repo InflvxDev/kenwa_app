@@ -7,7 +7,7 @@ class SoundService {
   static Future<void> playAlarm() async {
     try {
       // Establecer la fuente del audio
-      await _player.setSource(AssetSource('sounds/alarm.mp4'));
+      await _player.setSource(AssetSource('sounds/timer.mp3'));
 
       // Reproducir el audio
       await _player.resume();
