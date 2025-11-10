@@ -3,12 +3,21 @@ import 'package:audioplayers/audioplayers.dart';
 class SoundService {
   static final AudioPlayer _player = AudioPlayer();
 
-  /// Reproduce un sonido de alarma durante 3 segundos
+  /// Reproduce un sonido de alarma
   static Future<void> playAlarm() async {
     try {
-      await _player.play(AssetSource('sounds/alarm.mp3'));
+      // Establecer la fuente del audio
+      await _player.setSource(AssetSource('sounds/alarm.mp4'));
+
+      // Reproducir el audio
+      await _player.resume();
+      
+      // Detener después de 3 segundos
+      Future.delayed(const Duration(seconds: 3), () async {
+        await _player.stop();
+      });
     } catch (e) {
-      // Manejar el error de reproducción aquí
+      await _player.stop();
     }
   }
 }

@@ -81,6 +81,7 @@ class TimerService {
   /// Reanudar timer
   void resume() {
     if (_state == TimerState.paused) {
+      _state = _lastActiveState;
       _startTimer();
     }
   }
@@ -111,14 +112,9 @@ class TimerService {
   /// Iniciar el contador interno
   void _startTimer() {
     _timer?.cancel();
-    _state = _state == TimerState.paused ? _state : _state;
 
-    if (_state == TimerState.paused) {
-      _state = _state == TimerState.paused
-          ? TimerState.working
-          : TimerState.breakActive;
-    }
-
+    // Si estamos reanudando desde pausa, no cambiar el estado
+    // Solo continuar con el estado actual
     _stateStream.add(_state);
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {

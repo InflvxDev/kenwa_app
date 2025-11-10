@@ -93,67 +93,69 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _setupTimerListeners() {
-    _timerStreamSubscription = _timerService.timerStream.listen((seconds) {
-      if (mounted) {
-        setState(() => _remainingSeconds = seconds);
+void _setupTimerListeners() {
+  _timerStreamSubscription = _timerService.timerStream.listen((seconds) {
+    if (mounted) {
+      setState(() => _remainingSeconds = seconds);
 
-        // Actualizar notificación persistente cuando el timer está corriendo
-        if (_timerState == TimerState.working ||
-            _timerState == TimerState.breakActive) {
-          _updateTimerNotification();
+      // Actualizar notificación persistente cuando el timer está corriendo
+      if (_timerState == TimerState.working ||
+          _timerState == TimerState.breakActive) {
+        _updateTimerNotification();
+      }
+    }
+  });
+
+  _stateStreamSubscription = _timerService.stateStream.listen((state) {
+    if (mounted) {
+      setState(() {
+        _timerState = state;
+
+        // Detectar cuando se completa una sesión de TRABAJO (estado 'completed')
+        if (state == TimerState.completed) {
+          // El trabajo se completó, aumentar estrés
+          _completedSessionType = TimerState.working;
+          _wasInBreak = false;
+          _cancelTimerNotification(); // Cancelar notificación al completar
+          _handleTimerCompleted();
         }
-      }
-    });
-
-    _stateStreamSubscription = _timerService.stateStream.listen((state) {
-      if (mounted) {
-        setState(() {
-          _timerState = state;
-
-          // Detectar cuando se completa una sesión de TRABAJO (estado 'completed')
-          if (state == TimerState.completed) {
-            // El trabajo se completó, aumentar estrés
-            _completedSessionType = TimerState.working;
-            _wasInBreak = false;
-            _cancelTimerNotification(); // Cancelar notificación al completar
-            _handleTimerCompleted();
-          }
-          // Detectar cuando se completa un DESCANSO (break que llega a 0 segundos)
-          else if (state == TimerState.idle &&
-              _remainingSeconds == 0 &&
-              !_breakJustCompleted &&
-              _wasInBreak) {
-            // Solo si estábamos EN un break (no fue un reset desde idle)
-            _breakJustCompleted = true;
-            _completedSessionType = TimerState.breakActive;
-            _wasInBreak = false;
-            _cancelTimerNotification(); // Cancelar notificación al completar
-            _handleTimerCompleted();
-          }
-          // Si el estado cambia a idle
-          else if (state == TimerState.idle) {
-            // Usuario presionó reset, resetear flags
-            _breakJustCompleted = false;
-            _wasInBreak = false;
-            _cancelTimerNotification(); // Cancelar notificación al hacer reset
-          }
-          // Si el estado cambia a paused
-          else if (state == TimerState.paused) {
-            _cancelTimerNotification(); // Cancelar notificación al pausar
-          }
-          // Si iniciamos un nuevo timer (working o breakActive)
-          else if (state == TimerState.working ||
-              state == TimerState.breakActive) {
-            // Rastrear si iniciamos un break
-            _wasInBreak = (state == TimerState.breakActive);
-            _breakJustCompleted = false;
-            _updateTimerNotification(); // Mostrar notificación al iniciar
-          }
-        });
-      }
-    });
-  }
+        // Detectar cuando se completa un DESCANSO (break que llega a 0 segundos)
+        else if (state == TimerState.idle &&
+            _remainingSeconds == 0 &&
+            !_breakJustCompleted &&
+            _wasInBreak) {
+          // Solo si estábamos EN un break (no fue un reset desde idle)
+          _breakJustCompleted = true;
+          _completedSessionType = TimerState.breakActive;
+          _wasInBreak = false;
+          _cancelTimerNotification(); // Cancelar notificación al completar
+          _handleTimerCompleted();
+        }
+        // Si el estado cambia a idle (usuario presionó reset)
+        else if (state == TimerState.idle) {
+          // Usuario presionó reset, resetear flags
+          _breakJustCompleted = false;
+          _wasInBreak = false;
+          _cancelTimerNotification(); // Cancelar notificación al hacer reset
+        }
+        // Si el estado cambia a paused - MANTENER el flag _wasInBreak
+        else if (state == TimerState.paused) {
+          // NO resetear _wasInBreak aquí, solo cancelar la notificación
+          // Esto permite que se recuerde si estábamos en break cuando se pausa
+          _cancelTimerNotification();
+        }
+        // Si iniciamos un nuevo timer (working o breakActive)
+        else if (state == TimerState.working ||
+            state == TimerState.breakActive) {
+          // Rastrear si iniciamos un break
+          _wasInBreak = (state == TimerState.breakActive);
+          _breakJustCompleted = false;
+          _updateTimerNotification(); // Mostrar notificación al iniciar
+        }
+      });
+    }
+  });
+}
 
   void _setupStressListeners() {
     _stressStreamSubscription = _stressService.stressStream.listen((level) {
@@ -264,14 +266,19 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  String _getImageForState(TimerState state) {
+String _getImageForState(TimerState state) {
     switch (state) {
       case TimerState.working:
         return 'assets/images/working.svg';
       case TimerState.breakActive:
         return 'assets/images/break.svg';
+      case TimerState.paused:
+        // Cuando está pausado, mostrar la imagen del último estado activo
+        return _timerService.lastActiveState == TimerState.breakActive
+            ? 'assets/images/break.svg'
+            : 'assets/images/working.svg';
       default:
-        return 'assets/images/working.svg'; // o puedes reutilizar una
+        return 'assets/images/working.svg';
     }
   }
 
