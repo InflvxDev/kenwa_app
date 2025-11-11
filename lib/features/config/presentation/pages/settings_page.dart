@@ -221,11 +221,17 @@ class _SettingsPageState extends State<SettingsPage> {
                 label: 'Intervalo entre descansos',
                 subLabel: 'Tiempo entre cada pausa activa',
                 initialValue: _intervaloDescansos,
-                minValue: 1,
-                maxValue: 120,
+                minValue: 10,
+                maxValue: 7200,
                 unit: 'min',
                 onValueChanged: (value) {
                   setState(() => _intervaloDescansos = value);
+                  TimerService().configure(
+                    workDurationSeconds:
+                        _intervaloDescansos, // El nuevo valor que seleccionó el usuario
+                    breakDurationSeconds:
+                        _tiempoDescanso, // El valor actual del otro slider
+                  );
                 },
               ),
               const SizedBox(height: 24),
@@ -233,11 +239,17 @@ class _SettingsPageState extends State<SettingsPage> {
                 label: 'Duración del descanso',
                 subLabel: 'Tiempo de pausa recomendado',
                 initialValue: _tiempoDescanso,
-                minValue: 1,
-                maxValue: 15,
+                minValue: 10,
+                maxValue: 900,
                 unit: 'min',
                 onValueChanged: (value) {
                   setState(() => _tiempoDescanso = value);
+                  TimerService().configure(
+                    workDurationSeconds:
+                        _intervaloDescansos, // El nuevo valor que seleccionó el usuario
+                    breakDurationSeconds:
+                        _tiempoDescanso, // El valor actual del otro slider
+                  );
                 },
               ),
               const SizedBox(height: 32),

@@ -5,10 +5,10 @@ import 'package:kenwa_app/app/theme/app_colors.dart';
 class FrecuenciaSlider extends StatefulWidget {
   final String label;
   final String subLabel;
-  final int initialValue;
-  final int minValue;
-  final int maxValue;
-  final Function(int) onValueChanged;
+  final int initialValue; // en segundos
+  final int minValue; // en segundos
+  final int maxValue; // en segundos
+  final Function(int) onValueChanged; // retorna segundos
   final String unit;
 
   const FrecuenciaSlider({
@@ -33,6 +33,16 @@ class _FrecuenciaSliderState extends State<FrecuenciaSlider> {
   void initState() {
     super.initState();
     _currentValue = widget.initialValue;
+  }
+
+  /// Convierte segundos a formato legible (ej: 60s → "1 min")
+  String _formatValue(int seconds) {
+    if (seconds < 60) {
+      return '$seconds s';
+    } else {
+      int minutes = seconds ~/ 60;
+      return '$minutes ${widget.unit}';
+    }
   }
 
   @override
@@ -69,7 +79,7 @@ class _FrecuenciaSliderState extends State<FrecuenciaSlider> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                '$_currentValue ${widget.unit}',
+                _formatValue(_currentValue),
                 style: Theme.of(
                   context,
                 ).textTheme.titleLarge?.copyWith(fontSize: 18),
@@ -85,7 +95,7 @@ class _FrecuenciaSliderState extends State<FrecuenciaSlider> {
           divisions: widget.maxValue - widget.minValue,
           activeColor: AppColors.primary,
           inactiveColor: AppColors.foreground.withValues(alpha: 0.15),
-          label: '$_currentValue ${widget.unit}',
+          label: _formatValue(_currentValue),
           onChanged: (value) {
             setState(() {
               _currentValue = value.toInt();

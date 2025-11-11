@@ -80,8 +80,8 @@ class _HomePageState extends State<HomePage> {
       if (config != null) {
         setState(() {
           _timerService.configure(
-            workDurationMinutes: config.intervaloDescansos,
-            breakDurationMinutes: config.tiempoDescanso,
+            workDurationSeconds: config.intervaloDescansos,
+            breakDurationSeconds: config.tiempoDescanso,
           );
           _currentStressLevel = _stressService.stressLevel;
           _isLoading = false;

@@ -11,6 +11,7 @@ import 'package:kenwa_app/features/config/presentation/widgets/boton_guardar.dar
 import 'package:kenwa_app/features/config/presentation/widgets/frecuencia_slider.dart';
 import 'package:kenwa_app/services/notification_service.dart';
 import 'package:kenwa_app/services/stress_service.dart';
+import 'package:kenwa_app/services/timer_service.dart';
 
 /// Página de configuración inicial del usuario
 class ConfiguracionInicialPage extends StatefulWidget {
@@ -52,8 +53,8 @@ class _ConfiguracionInicialPageState extends State<ConfiguracionInicialPage> {
   void _initializeDefaults() {
     _horaInicio = HoraDelDia(hour: 8, minute: 0);
     _horaFin = HoraDelDia(hour: 18, minute: 0);
-    _intervaloDescansos = 60; // minutos
-    _tiempoDescanso = 5; // minutos
+    _intervaloDescansos = 3600; // segundos
+    _tiempoDescanso = 300; // segundos
     _notificacionesActivas = false;
     _nivelEstres = 1; // Bajo (valor externo)
   }
@@ -158,11 +159,17 @@ class _ConfiguracionInicialPageState extends State<ConfiguracionInicialPage> {
                 label: 'Intervalo entre descansos',
                 subLabel: 'Tiempo entre cada pausa activa',
                 initialValue: _intervaloDescansos,
-                minValue: 1,
-                maxValue: 120,
+                minValue: 10,
+                maxValue: 7200,
                 unit: 'min',
                 onValueChanged: (value) {
                   setState(() => _intervaloDescansos = value);
+                  TimerService().configure(
+                    workDurationSeconds:
+                        _intervaloDescansos, // El nuevo valor que seleccionó el usuario
+                    breakDurationSeconds:
+                        _tiempoDescanso, // El valor actual del otro slider
+                  );
                 },
               ),
               const SizedBox(height: 24),
@@ -170,11 +177,17 @@ class _ConfiguracionInicialPageState extends State<ConfiguracionInicialPage> {
                 label: 'Duración del descanso',
                 subLabel: 'Tiempo de pausa recomendado',
                 initialValue: _tiempoDescanso,
-                minValue: 1,
-                maxValue: 15,
+                minValue: 10,
+                maxValue: 900,
                 unit: 'min',
                 onValueChanged: (value) {
                   setState(() => _tiempoDescanso = value);
+                  TimerService().configure(
+                    workDurationSeconds:
+                        _intervaloDescansos, // El nuevo valor que seleccionó el usuario
+                    breakDurationSeconds:
+                        _tiempoDescanso, // El valor actual del otro slider
+                  );
                 },
               ),
               const SizedBox(height: 32),

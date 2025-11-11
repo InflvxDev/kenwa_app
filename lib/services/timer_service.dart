@@ -19,9 +19,9 @@ class TimerService {
   TimerState _lastActiveState =
       TimerState.idle; // Almacena el último estado activo
 
-  // Configuración actual
-  int _workDurationMinutes = 60;
-  int _breakDurationMinutes = 5;
+  // Configuración actual (EN SEGUNDOS, no minutos)
+  int _workDurationSeconds = 3600;
+  int _breakDurationSeconds = 300;
 
   // Streams para notificar cambios
   final _timerStream = StreamController<int>.broadcast();
@@ -34,13 +34,13 @@ class TimerService {
   TimerState get state => _state;
   TimerState get lastActiveState => _lastActiveState;
 
-  /// Configurar duración de trabajo y descanso
+  /// Configurar duración de trabajo y descanso (EN SEGUNDOS)
   void configure({
-    required int workDurationMinutes,
-    required int breakDurationMinutes,
+    required int workDurationSeconds,
+    required int breakDurationSeconds,
   }) {
-    _workDurationMinutes = workDurationMinutes;
-    _breakDurationMinutes = breakDurationMinutes;
+    _workDurationSeconds = workDurationSeconds;
+    _breakDurationSeconds = breakDurationSeconds;
   }
 
   /// Iniciar sesión de trabajo
@@ -49,7 +49,7 @@ class TimerService {
       stop();
     }
 
-    _remainingSeconds = _workDurationMinutes * 60;
+    _remainingSeconds = _workDurationSeconds;
     _state = TimerState.working;
     _lastActiveState = TimerState.working;
     _stateStream.add(_state);
@@ -62,7 +62,7 @@ class TimerService {
       stop();
     }
 
-    _remainingSeconds = _breakDurationMinutes * 60;
+    _remainingSeconds = _breakDurationSeconds;
     _state = TimerState.breakActive;
     _lastActiveState = TimerState.breakActive;
     _stateStream.add(_state);
@@ -113,8 +113,6 @@ class TimerService {
   void _startTimer() {
     _timer?.cancel();
 
-    // Si estamos reanudando desde pausa, no cambiar el estado
-    // Solo continuar con el estado actual
     _stateStream.add(_state);
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -152,7 +150,5 @@ class TimerService {
   /// Limpiar recursos
   void dispose() {
     _timer?.cancel();
-    // NO cerramos los streams porque TimerService es un singleton
-    // que se reutiliza en toda la app. Los streams deben permanecer abiertos.
   }
 }
