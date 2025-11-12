@@ -38,6 +38,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   bool _breakJustCompleted = false; // Detectar cuando break se completa
   late TimerState _completedSessionType; // Guardar tipo de sesión completada
   bool _wasInBreak = false; // Rastrear si estábamos en break antes del reset
+  bool _workCompletionModalShown = false; // Protector para modal de trabajo
+  bool _breakCompletionModalShown = false; // Protector para modal de descanso
 
   // Guardar subscripciones para cancelarlas en dispose
   late StreamSubscription<int> _timerStreamSubscription;
@@ -162,10 +164,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           _timerState = state;
 
           // Detectar cuando se completa una sesión de TRABAJO (estado 'completed')
-          if (state == TimerState.completed) {
+          if (state == TimerState.completed && !_workCompletionModalShown) {
             // El trabajo se completó, aumentar estrés
             _completedSessionType = TimerState.working;
             _wasInBreak = false;
+            _workCompletionModalShown =
+                true; // Marcar que ya se muestra el modal
             _cancelTimerNotification(); // Cancelar notificación al completar
             _handleTimerCompleted();
           }
@@ -173,11 +177,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           else if (state == TimerState.idle &&
               _remainingSeconds == 0 &&
               !_breakJustCompleted &&
-              _wasInBreak) {
+              _wasInBreak &&
+              !_breakCompletionModalShown) {
             // Solo si estábamos EN un break (no fue un reset desde idle)
             _breakJustCompleted = true;
             _completedSessionType = TimerState.breakActive;
             _wasInBreak = false;
+            _breakCompletionModalShown =
+                true; // Marcar que ya se muestra el modal
             _cancelTimerNotification(); // Cancelar notificación al completar
             _handleTimerCompleted();
           }
@@ -186,6 +193,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             // Usuario presionó reset, resetear flags
             _breakJustCompleted = false;
             _wasInBreak = false;
+            _workCompletionModalShown = false;
+            _breakCompletionModalShown = false;
             _cancelTimerNotification(); // Cancelar notificación al hacer reset
           }
           // Si el estado cambia a paused - MANTENER el flag _wasInBreak
