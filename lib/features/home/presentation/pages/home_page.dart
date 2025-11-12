@@ -12,6 +12,7 @@ import 'package:kenwa_app/features/home/presentation/widgets/timer_controls.dart
 import 'package:kenwa_app/features/home/presentation/widgets/timer_display.dart';
 import 'package:kenwa_app/features/home/presentation/widgets/timer_status_label.dart';
 import 'package:kenwa_app/features/home/presentation/widgets/estado_animo_modal.dart';
+import 'package:kenwa_app/services/background_timer_service.dart';
 import 'package:kenwa_app/services/notification_service.dart';
 import 'package:kenwa_app/services/sound_service.dart';
 import 'package:kenwa_app/services/stress_service.dart';
@@ -26,9 +27,10 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   late TimerService _timerService;
   late StressService _stressService;
+  late BackgroundTimerService _backgroundService;
   bool _isLoading = true;
   late TimerState _timerState;
   late int _remainingSeconds;
@@ -45,14 +47,19 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    // Registrar observer para detectar cambios en el ciclo de vida de la app
+    WidgetsBinding.instance.addObserver(this);
+
     _timerService = TimerService();
     _stressService = StressService();
+    _backgroundService = BackgroundTimerService();
     _timerState = _timerService.state;
     _remainingSeconds = _timerService.remainingSeconds;
     _currentStressLevel = _stressService.stressLevel;
     _loadConfiguration();
     _setupTimerListeners();
     _setupStressListeners();
+    _initializeBackgroundExecution();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future(() async {
@@ -62,6 +69,19 @@ class _HomePageState extends State<HomePage> {
         }
       });
     });
+  }
+
+  /// Inicializar la ejecución en background
+  Future<void> _initializeBackgroundExecution() async {
+    try {
+      final initialized = await _backgroundService.initialize();
+      if (initialized && _timerService.state != TimerState.idle) {
+        // Si hay un timer activo, habilitar background execution
+        await _backgroundService.enableBackground();
+      }
+    } catch (e) {
+      debugPrint('Error inicializando background execution: $e');
+    }
   }
 
   void _loadConfiguration() async {
@@ -93,69 +113,99 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-void _setupTimerListeners() {
-  _timerStreamSubscription = _timerService.timerStream.listen((seconds) {
-    if (mounted) {
-      setState(() => _remainingSeconds = seconds);
+  /// Detectar cambios en el ciclo de vida de la app
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
 
-      // Actualizar notificación persistente cuando el timer está corriendo
-      if (_timerState == TimerState.working ||
-          _timerState == TimerState.breakActive) {
-        _updateTimerNotification();
+    switch (state) {
+      case AppLifecycleState.paused:
+        // App va al background
+        debugPrint('App entró en background');
+        break;
+      case AppLifecycleState.resumed:
+        // App regresa del background - sincronizar el timer
+        debugPrint('App regresó del background, sincronizando timer');
+        _timerService.syncFromBackground();
+        break;
+      case AppLifecycleState.inactive:
+        // App está inactiva (entre paused y resumed)
+        debugPrint('App inactiva');
+        break;
+      case AppLifecycleState.detached:
+        // App se cerrará
+        debugPrint('App se cerrará');
+        break;
+      case AppLifecycleState.hidden:
+        // App está oculta (solo en desktop)
+        debugPrint('App oculta');
+        break;
+    }
+  }
+
+  void _setupTimerListeners() {
+    _timerStreamSubscription = _timerService.timerStream.listen((seconds) {
+      if (mounted) {
+        setState(() => _remainingSeconds = seconds);
+
+        // Actualizar notificación persistente cuando el timer está corriendo
+        if (_timerState == TimerState.working ||
+            _timerState == TimerState.breakActive) {
+          _updateTimerNotification();
+        }
       }
-    }
-  });
+    });
 
-  _stateStreamSubscription = _timerService.stateStream.listen((state) {
-    if (mounted) {
-      setState(() {
-        _timerState = state;
+    _stateStreamSubscription = _timerService.stateStream.listen((state) {
+      if (mounted) {
+        setState(() {
+          _timerState = state;
 
-        // Detectar cuando se completa una sesión de TRABAJO (estado 'completed')
-        if (state == TimerState.completed) {
-          // El trabajo se completó, aumentar estrés
-          _completedSessionType = TimerState.working;
-          _wasInBreak = false;
-          _cancelTimerNotification(); // Cancelar notificación al completar
-          _handleTimerCompleted();
-        }
-        // Detectar cuando se completa un DESCANSO (break que llega a 0 segundos)
-        else if (state == TimerState.idle &&
-            _remainingSeconds == 0 &&
-            !_breakJustCompleted &&
-            _wasInBreak) {
-          // Solo si estábamos EN un break (no fue un reset desde idle)
-          _breakJustCompleted = true;
-          _completedSessionType = TimerState.breakActive;
-          _wasInBreak = false;
-          _cancelTimerNotification(); // Cancelar notificación al completar
-          _handleTimerCompleted();
-        }
-        // Si el estado cambia a idle (usuario presionó reset)
-        else if (state == TimerState.idle) {
-          // Usuario presionó reset, resetear flags
-          _breakJustCompleted = false;
-          _wasInBreak = false;
-          _cancelTimerNotification(); // Cancelar notificación al hacer reset
-        }
-        // Si el estado cambia a paused - MANTENER el flag _wasInBreak
-        else if (state == TimerState.paused) {
-          // NO resetear _wasInBreak aquí, solo cancelar la notificación
-          // Esto permite que se recuerde si estábamos en break cuando se pausa
-          _cancelTimerNotification();
-        }
-        // Si iniciamos un nuevo timer (working o breakActive)
-        else if (state == TimerState.working ||
-            state == TimerState.breakActive) {
-          // Rastrear si iniciamos un break
-          _wasInBreak = (state == TimerState.breakActive);
-          _breakJustCompleted = false;
-          _updateTimerNotification(); // Mostrar notificación al iniciar
-        }
-      });
-    }
-  });
-}
+          // Detectar cuando se completa una sesión de TRABAJO (estado 'completed')
+          if (state == TimerState.completed) {
+            // El trabajo se completó, aumentar estrés
+            _completedSessionType = TimerState.working;
+            _wasInBreak = false;
+            _cancelTimerNotification(); // Cancelar notificación al completar
+            _handleTimerCompleted();
+          }
+          // Detectar cuando se completa un DESCANSO (break que llega a 0 segundos)
+          else if (state == TimerState.idle &&
+              _remainingSeconds == 0 &&
+              !_breakJustCompleted &&
+              _wasInBreak) {
+            // Solo si estábamos EN un break (no fue un reset desde idle)
+            _breakJustCompleted = true;
+            _completedSessionType = TimerState.breakActive;
+            _wasInBreak = false;
+            _cancelTimerNotification(); // Cancelar notificación al completar
+            _handleTimerCompleted();
+          }
+          // Si el estado cambia a idle (usuario presionó reset)
+          else if (state == TimerState.idle) {
+            // Usuario presionó reset, resetear flags
+            _breakJustCompleted = false;
+            _wasInBreak = false;
+            _cancelTimerNotification(); // Cancelar notificación al hacer reset
+          }
+          // Si el estado cambia a paused - MANTENER el flag _wasInBreak
+          else if (state == TimerState.paused) {
+            // NO resetear _wasInBreak aquí, solo cancelar la notificación
+            // Esto permite que se recuerde si estábamos en break cuando se pausa
+            _cancelTimerNotification();
+          }
+          // Si iniciamos un nuevo timer (working o breakActive)
+          else if (state == TimerState.working ||
+              state == TimerState.breakActive) {
+            // Rastrear si iniciamos un break
+            _wasInBreak = (state == TimerState.breakActive);
+            _breakJustCompleted = false;
+            _updateTimerNotification(); // Mostrar notificación al iniciar
+          }
+        });
+      }
+    });
+  }
 
   void _setupStressListeners() {
     _stressStreamSubscription = _stressService.stressStream.listen((level) {
@@ -266,7 +316,7 @@ void _setupTimerListeners() {
     }
   }
 
-String _getImageForState(TimerState state) {
+  String _getImageForState(TimerState state) {
     switch (state) {
       case TimerState.working:
         return 'assets/images/working.svg';
@@ -285,12 +335,16 @@ String _getImageForState(TimerState state) {
   void _startTimer() {
     if (_timerState == TimerState.idle || _timerState == TimerState.completed) {
       _timerService.startWorkSession();
+      // Habilitar background execution cuando inicia el timer
+      _enableBackgroundIfNeeded();
     }
   }
 
   void _startBreak() {
     if (_timerState == TimerState.idle || _timerState == TimerState.completed) {
       _timerService.startBreakSession();
+      // Habilitar background execution cuando inicia el timer
+      _enableBackgroundIfNeeded();
     }
   }
 
@@ -304,10 +358,36 @@ String _getImageForState(TimerState state) {
 
   void _stopTimer() {
     _timerService.stop();
+    // Deshabilitar background execution cuando se detiene
+    _disableBackgroundIfNeeded();
   }
 
   void _resetTimer() {
     _timerService.reset();
+    // Deshabilitar background execution cuando se resetea
+    _disableBackgroundIfNeeded();
+  }
+
+  /// Habilitar background execution si es necesario
+  Future<void> _enableBackgroundIfNeeded() async {
+    if (!_backgroundService.isBackgroundExecutionEnabled) {
+      try {
+        await _backgroundService.enableBackground();
+      } catch (e) {
+        debugPrint('Error habilitando background: $e');
+      }
+    }
+  }
+
+  /// Deshabilitar background execution si es necesario
+  Future<void> _disableBackgroundIfNeeded() async {
+    if (_backgroundService.isBackgroundExecutionEnabled) {
+      try {
+        await _backgroundService.disableBackground();
+      } catch (e) {
+        debugPrint('Error deshabilitando background: $e');
+      }
+    }
   }
 
   @override
@@ -402,6 +482,9 @@ String _getImageForState(TimerState state) {
 
   @override
   void dispose() {
+    // Remover observer
+    WidgetsBinding.instance.removeObserver(this);
+
     // Cancelar las subscripciones al stream para evitar setState() after dispose
     _timerStreamSubscription.cancel();
     _stateStreamSubscription.cancel();

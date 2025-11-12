@@ -33,21 +33,43 @@ class TimerControls extends StatelessWidget {
         children: [
           // Botón de inicio
           if (timerState == TimerState.idle)
-            ElevatedButton.icon(
-              onPressed: onStart,
-              icon: const Icon(Icons.play_arrow),
-              label: const Text('Comenzar Trabajo'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
+            Column(
+              children: [
+                ElevatedButton.icon(
+                  onPressed: onStart,
+                  icon: const Icon(Icons.play_arrow),
+                  label: const Text('Comenzar Trabajo'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: onBreakStart,
+                  icon: const Icon(Icons.emoji_food_beverage),
+                  label: const Text('Descansar'),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      color: AppColors.foreground.withValues(alpha: 0.3),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
 
           // Botones de pausa/detener

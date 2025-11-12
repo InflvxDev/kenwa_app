@@ -23,6 +23,9 @@ class TimerService {
   int _workDurationSeconds = 3600;
   int _breakDurationSeconds = 300;
 
+  // Timestamps para sincronización en background
+  DateTime? _sessionStartTime; // Hora cuando se inició la sesión actual
+
   // Streams para notificar cambios
   final _timerStream = StreamController<int>.broadcast();
   final _stateStream = StreamController<TimerState>.broadcast();
@@ -52,6 +55,7 @@ class TimerService {
     _remainingSeconds = _workDurationSeconds;
     _state = TimerState.working;
     _lastActiveState = TimerState.working;
+    _sessionStartTime = DateTime.now();
     _stateStream.add(_state);
     _startTimer();
   }
@@ -65,6 +69,7 @@ class TimerService {
     _remainingSeconds = _breakDurationSeconds;
     _state = TimerState.breakActive;
     _lastActiveState = TimerState.breakActive;
+    _sessionStartTime = DateTime.now();
     _stateStream.add(_state);
     _startTimer();
   }
@@ -94,6 +99,7 @@ class TimerService {
     _remainingSeconds = 0;
     _state = TimerState.idle;
     _lastActiveState = TimerState.idle;
+    _sessionStartTime = null;
     _stateStream.add(_state);
     _timerStream.add(0);
   }
@@ -105,8 +111,53 @@ class TimerService {
     }
     _remainingSeconds = 0;
     _state = TimerState.idle;
+    _sessionStartTime = null;
     _stateStream.add(_state);
     _timerStream.add(0);
+  }
+
+  /// Sincronizar el timer cuando se regresa del background
+  /// Recalcula el tiempo restante basado en el tiempo transcurrido
+  void syncFromBackground() {
+    if (_state == TimerState.idle || _sessionStartTime == null) {
+      return; // No hay sesión activa
+    }
+
+    if (_state == TimerState.paused) {
+      return; // Si está pausado, no hacer nada
+    }
+
+    // Calcular tiempo transcurrido desde el inicio de la sesión
+    final now = DateTime.now();
+    final elapsedSeconds = now.difference(_sessionStartTime!).inSeconds;
+
+    // Determinar la duración original de la sesión
+    final originalDuration = _lastActiveState == TimerState.breakActive
+        ? _breakDurationSeconds
+        : _workDurationSeconds;
+
+    // Calcular nuevo tiempo restante
+    int newRemainingSeconds = originalDuration - elapsedSeconds;
+
+    // Si ya pasó el tiempo, marcar como completado
+    if (newRemainingSeconds <= 0) {
+      _remainingSeconds = 0;
+      _timer?.cancel();
+
+      if (_lastActiveState == TimerState.breakActive) {
+        _state = TimerState.idle;
+        _lastActiveState = TimerState.idle;
+      } else {
+        _state = TimerState.completed;
+      }
+
+      _stateStream.add(_state);
+      _timerStream.add(0);
+    } else {
+      // Actualizar el tiempo restante
+      _remainingSeconds = newRemainingSeconds;
+      _timerStream.add(_remainingSeconds);
+    }
   }
 
   /// Iniciar el contador interno
